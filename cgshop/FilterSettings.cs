@@ -11,9 +11,6 @@ namespace cgshop
 
         // --- Function filters: Graph ---
 
-        //public static List<GraphPoint> inversionFunctionPoints = new List<GraphPoint>() { new GraphPoint(0, 255, true), 
-        //                                                                                  new GraphPoint(255, 0, true), };
-
         // First and last points can be moved only vertically
         public static List<GraphPoint> identityFunctionPoints = new List<GraphPoint>() { new GraphPoint(0, 0),
                                                                                           new GraphPoint(255, 255) };
@@ -32,26 +29,43 @@ namespace cgshop
 
 
         // --- Function filters: Formula ---
-        public delegate int FunctionFormula_Formula(int value, int channelNumer, params object[] otherParams);
+        public delegate int[] FunctionFormula_Formula(int[] pixel,  params object[] otherParams);
         public static FunctionFormula_Formula functionFormula_Formula;
 
         public static double gammaCoefficient = 3.0;
-        public static int CalculateGamma(int value, int channelNumer, params object[] otherParams)
+        public static int[] CalculateGamma(int[] pixel, params object[] otherParams)
         {
-            if (channelNumer < 0 || channelNumer > 3)
-                throw new Exception("Wrong channel settings passed to Calculate Gamma function");
-
             if (otherParams.Length != 1)
                 throw new Exception("Wrong additional parameters passed to Calculate Gamma function");
+            
+            double gammaCoefficient = (double)otherParams[0];
+            int[] result = pixel;
 
-            double result = value;
-            if (channelNumer != 3)
+            for (int i = 0; i < 3; i++) // For each color channel
             {
-                double gammaCoefficient = (double)otherParams[0];
-                result = Utils.Clamp((int)(255 * Math.Pow((double)value / 255, 1 / gammaCoefficient)), 0, 255);
+                result[i] = Utils.Clamp((int)(255 * Math.Pow((double)pixel[i] / 255, 1 / gammaCoefficient)), 0, 255);
             }
-            return (int)result;
+
+            return result;
         }
+
+
+        public static int[] CalculateGrayscale(int[] pixel, params object[] otherParams)
+        {
+            int[] result = pixel;
+
+            byte gray = (byte)(pixel[0] * .21 + pixel[1] * .71 + pixel[2] * .071);
+
+            for (int i = 0; i < 3; i++) // For each color channel
+            {
+                result[i] = gray;
+            }
+
+            return result; 
+        }
+
+
+
 
         // --- Convolution filters ---
 
