@@ -10,6 +10,7 @@
 
     <Window.Resources>
         <local:MathConverter x:Key="MathConverter"/>
+        <local:NullToBoolConverter x:Key="NullToBoolConverter"/>
 
         <Style TargetType="{x:Type Button}">
             <Setter Property="Background" Value="#FFE8E8E8"/>
@@ -67,6 +68,9 @@
                         <Button Content="Revert" Width="75" Height="22" Margin="10,0,10,0" Click="ButtonRevert_Click"/>
                         <Button Content="Save" Width="75" Height="22" Margin="10,0,10,0" Click="ButtonSave_Click"/>
                     </StackPanel>
+                   
+
+
 
                     <StackPanel Grid.Row="1">
                         <GroupBox Header="Function Filters" VerticalAlignment="Top">
@@ -79,7 +83,15 @@
                                                     <Grid>
                                                         <Label Content="{ Binding Name }" Padding="0" MouseDoubleClick="FilterName_MouseDoubleClick"/>
                                                         <TextBox MinWidth="100" Visibility="Collapsed" Text="{ Binding Name , Mode=TwoWay }" KeyDown="FilterName_KeyDown"/>
-                                                        <!--<Button Content="-" Width="15" HorizontalAlignment="Right"/>-->
+                                                        <Button Width="13" Height="13" VerticalAlignment="Center" HorizontalAlignment="Right" Click="FunctionFilterDeleteButton_Click" Padding="0" >
+                                                            <Label Content="-" Padding="0" >
+                                                                <Label.RenderTransform>
+                                                                    <TransformGroup>
+                                                                        <TranslateTransform Y="-2"/>
+                                                                    </TransformGroup>
+                                                                </Label.RenderTransform>
+                                                            </Label>
+                                                        </Button>
                                                     </Grid>
                                                 </RadioButton>
                                             </DataTemplate>
@@ -118,14 +130,22 @@
                                             <Grid>
                                                 <Label Content="{ Binding Name }" Padding="0" MouseDoubleClick="FilterName_MouseDoubleClick"/>
                                                 <TextBox MinWidth="100" Visibility="Collapsed" Text="{ Binding Name , Mode=TwoWay }" KeyDown="FilterName_KeyDown"/>
-                                                <!--<Button Content="-" Width="15" HorizontalAlignment="Right"/>-->
+                                                <Button Width="13" Height="13" VerticalAlignment="Center" HorizontalAlignment="Right" Click="ConvolutionFilterDeleteButton_Click" Padding="0" >
+                                                    <Label Content="-" Padding="0" >
+                                                        <Label.RenderTransform>
+                                                            <TransformGroup>
+                                                                <TranslateTransform Y="-2"/>
+                                                            </TransformGroup>
+                                                        </Label.RenderTransform>
+                                                    </Label>
+                                                </Button>
                                             </Grid>
                                         </RadioButton>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </GroupBox>
-                        <Button Content="Apply" Height="22" VerticalAlignment="Top" HorizontalContentAlignment="Center"  Margin="0,20,0,0" Click="ButtonApply_Click"/>
+                        <Button Content="Apply" Height="22" VerticalAlignment="Top" HorizontalContentAlignment="Center"  Margin="0,20,0,0" Click="ButtonApply_Click" IsEnabled="{Binding Path=SelectedFilterEntry, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}, Converter={StaticResource NullToBoolConverter}}" />
                     </StackPanel>
 
                 </Grid>

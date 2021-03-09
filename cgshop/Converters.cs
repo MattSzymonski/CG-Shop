@@ -8,10 +8,22 @@ using System.Windows.Data;
 
 namespace cgshop
 {
-    class Converters
-    {
-    }
 
+    //For displaying colors in rectangle
+    public class NullToBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType,
+        object parameter, CultureInfo culture)
+        {
+            return value != null ? true : false;
+        }
+
+        public object ConvertBack(object value, Type targetType,
+        object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 
     // Copyrights to Rachel Lim
     // https://rachel53461.wordpress.com/2011/08/20/the-math-converter/

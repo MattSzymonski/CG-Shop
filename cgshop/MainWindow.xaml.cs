@@ -1,5 +1,14 @@
-﻿//I certify that this assignment is entirely my own work, performed independently and without any help from the sources which are not allowed.
-//Mateusz Szymoński
+﻿// I certify that this assignment is entirely my own work, performed independently and without any help from the sources which are not allowed.
+// Mateusz Szymoński
+
+
+// README
+// Every task is completed
+// To graph point select one with left mouse button and press delete key on keyboard
+// To add new graph point click with left mouse button on polyline
+// Moving graph points might be a bit inconvenient but it fully works, (just move mouse slowly to avoid loosing focus on graph point and stoping moving it)
+// Double click on filter name in list to rename it, accept with enter key
+// Configurations of initial filters are available in FilterSettings.cs file
 
 using Microsoft.Win32;
 using System;
@@ -11,10 +20,12 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace cgshop
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         private int DRAGGING_POINT_SIZE = 8;
         private int MINIMAL_DRAGGING_POINT_MARGIN = 8;
@@ -36,16 +47,33 @@ namespace cgshop
         public ObservableCollection<FilterEntry> functionFilterEntries;
         public ObservableCollection<FilterEntry> convolutionFilterEntries;
 
+
+        public FilterEntry SelectedFilterEntry { get { return selectedFilterEntry; } set { selectedFilterEntry = value; OnPropertyChanged(); } }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChangedEventHandler handler = this.PropertyChanged;
+            if (handler != null)
+            {
+                var e = new PropertyChangedEventArgs(propertyName);
+                handler(this, e);
+            }
+        }
+
+
         public MainWindow()
         {
-            InitializeComponent(); 
+            InitializeComponent();
+            DataContext = this;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             originalImage = currentImage = new BitmapImage(new Uri("/Res/ClaymoreRoomba.png", UriKind.Relative));
             Viewer.Source = originalImage;
-
+            FilterFunctionGraphViewer.Visibility = Visibility.Collapsed;
 
             // ------------ Function filters ------------
             activeDraggingPoints = new List<Ellipse>();
@@ -92,7 +120,7 @@ namespace cgshop
             //RadioButton gridInTemplate = (RadioButton)FunctionFilterEntriesList.Template.FindName("Radio", FunctionFilterEntriesList);
             //((FunctionFilterEntriesList.Template.FindName("Radio", FunctionFilterEntriesList[0]) as RadioButton).IsChecked = true;
 
-            selectedFilterEntry = functionFilterEntries[0];
+            //SelectedFilterEntry = functionFilterEntries[0];
         }
 
         
@@ -149,7 +177,7 @@ namespace cgshop
 
         private void ButtonApply_Click(object sender, RoutedEventArgs e)
         {
-            currentImage = selectedFilterEntry.Filter.Apply(currentImage);      
+            currentImage = SelectedFilterEntry.Filter.Apply(currentImage);      
             Viewer.Source = currentImage;
         }
 
@@ -194,7 +222,7 @@ namespace cgshop
                         activeDraggingPoint = null;
 
                         // Remove point from function graph
-                        ((selectedFilterEntry.Filter as FunctionFilter).Function as FunctionGraph).Graph.points.RemoveAt(index);
+                        ((SelectedFilterEntry.Filter as FunctionFilter).Function as FunctionGraph).Graph.points.RemoveAt(index);
 
                         // Update line
                         functionGraphPoints.RemoveAt(index); 
@@ -305,11 +333,11 @@ namespace cgshop
                     index = FunctionFilterEntriesList.Items.IndexOf(item);
             }
 
-            selectedFilterEntry = functionFilterEntries[index];
+            SelectedFilterEntry = functionFilterEntries[index];
 
-            if ((selectedFilterEntry.Filter as FunctionFilter).Function is FunctionGraph) // Load function graph viewer if function graph is available in filter
+            if ((SelectedFilterEntry.Filter as FunctionFilter).Function is FunctionGraph) // Load function graph viewer if function graph is available in filter
             {
-                FunctionGraph selectedFunctionGraph = ((selectedFilterEntry.Filter as FunctionFilter).Function as FunctionGraph);
+                FunctionGraph selectedFunctionGraph = ((SelectedFilterEntry.Filter as FunctionFilter).Function as FunctionGraph);
 
                 //// Draw graph
                 FilterFunctionGraphViewer.Visibility = Visibility.Visible;
@@ -439,7 +467,7 @@ namespace cgshop
                     Point newGraphPoint = CalculatePointValueFromCanvasPosition(new Point(mousePosition.X - DRAGGING_POINT_SIZE / 2, mousePosition.Y + DRAGGING_POINT_SIZE / 2));
 
                     // Add new point to graph function
-                    int graphPointIndex = ((selectedFilterEntry.Filter as FunctionFilter).Function as FunctionGraph).Graph.AddPoint(new GraphPoint((int)newGraphPoint.X, (int)newGraphPoint.Y));
+                    int graphPointIndex = ((SelectedFilterEntry.Filter as FunctionFilter).Function as FunctionGraph).Graph.AddPoint(new GraphPoint((int)newGraphPoint.X, (int)newGraphPoint.Y));
 
                     Ellipse draggingPoint = CreateDraggingPoint(graphPointIndex);
 
@@ -471,8 +499,43 @@ namespace cgshop
             }
 
             FilterFunctionGraphViewer.Visibility = Visibility.Collapsed;
-            selectedFilterEntry = convolutionFilterEntries[index];
+            SelectedFilterEntry = convolutionFilterEntries[index];
         }
+
+        private void FunctionFilterDeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            int index = -1;
+            Button btn = sender as Button;
+            if (btn != null)
+            {
+                object item = ((btn.Parent as Grid).Parent as RadioButton).DataContext;
+                if (item != null)
+                    index = FunctionFilterEntriesList.Items.IndexOf(item);
+            }
+
+            if (functionFilterEntries[index] == SelectedFilterEntry)
+                SelectedFilterEntry = null;
+
+            functionFilterEntries.RemoveAt(index);
+        }
+
+        private void ConvolutionFilterDeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            int index = -1;
+            Button btn = sender as Button;
+            if (btn != null)
+            {
+                object item = ((btn.Parent as Grid).Parent as RadioButton).DataContext;
+                if (item != null)
+                    index = ConvolutionFilterEntriesList.Items.IndexOf(item);
+            }
+
+            if (convolutionFilterEntries[index] == SelectedFilterEntry)
+                SelectedFilterEntry = null;
+
+            convolutionFilterEntries.RemoveAt(index);           
+        }
+
 
     }
 }
