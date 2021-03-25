@@ -1,0 +1,58 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="cgshop.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="TestName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Hi Matee</Value>
+    </Setting>
+    <Setting Name="FilterEntries" Type="cgshop.FilterEntry" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="Setting" Type="System.Int32[]" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfInt xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;int&gt;0&lt;/int&gt;
+  &lt;int&gt;1&lt;/int&gt;
+  &lt;int&gt;3&lt;/int&gt;
+&lt;/ArrayOfInt&gt;</Value>
+    </Setting>
+    <Setting Name="Setting1" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="Setting2" Type="cgshop.FilterEntry" Scope="User">
+      <Value Profile="(Default)">&lt;userSettings&gt;
+    &lt;SettingsTest.Properties.Settings&gt;
+        &lt;setting name="DefaultEmployee" serializeAs="Xml"&gt;
+            &lt;value&gt;
+                &lt;Employee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+                    &lt;Name&gt;John&lt;/Name&gt;
+                    &lt;Position&gt;Developer&lt;/Position&gt;
+                &lt;/Employee&gt;
+            &lt;/value&gt;
+        &lt;/setting&gt;
+        &lt;setting name="DefaultRoom" serializeAs="String"&gt;
+            &lt;value&gt;1,Reception&lt;/value&gt;
+        &lt;/setting&gt;
+    &lt;/SettingsTest.Properties.Settings&gt;
+&lt;/userSettings&gt;</Value>
+    </Setting>
+    <Setting Name="Setting3" Type="System.String" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;MySettingsType xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;SettingBool&gt;true&lt;/SettingBool&gt;
+  &lt;SettingInt&gt;4345&lt;/SettingInt&gt;
+  &lt;SettingStringArray&gt;
+    &lt;string&gt;a&lt;/string&gt;
+    &lt;string&gt;b&lt;/string&gt;
+  &lt;/SettingStringArray&gt;
+&lt;/MySettingsType&gt;</Value>
+    </Setting>
+    <Setting Name="Uber" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="Filter1" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+  </Settings>
+</SettingsFile>
