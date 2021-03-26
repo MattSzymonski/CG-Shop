@@ -76,7 +76,8 @@ namespace cgshop
             Viewer.Source = originalImage;
             FilterFunctionGraphViewer.Visibility = Visibility.Collapsed;
             FilterFunctionSettings.Visibility = Visibility.Collapsed;
-            FilterFunctionOtherSettings.Visibility = Visibility.Collapsed;
+            FilterFunctionDitheringSettings.Visibility = Visibility.Collapsed;
+            FilterFunctionQuantizationSettings.Visibility = Visibility.Collapsed;
 
             // ------------ Function filters ------------
             activeDraggingPoints = new List<Ellipse>();
@@ -332,7 +333,8 @@ namespace cgshop
         private void FunctionFilterEntry_Unchecked(object sender, RoutedEventArgs e)
         {
             FilterFunctionSettings.Visibility = Visibility.Collapsed;
-            FilterFunctionOtherSettings.Visibility = Visibility.Collapsed;
+            FilterFunctionDitheringSettings.Visibility = Visibility.Collapsed;
+            FilterFunctionQuantizationSettings.Visibility = Visibility.Collapsed;
             FilterFunctionGraphViewer.Visibility = Visibility.Collapsed;
         }
         
@@ -354,7 +356,12 @@ namespace cgshop
 
             if (SelectedFilterEntry.Name == "Average Dithering") // Load function K settings
             {
-                FilterFunctionOtherSettings.Visibility = Visibility.Visible;
+                FilterFunctionDitheringSettings.Visibility = Visibility.Visible;
+            }
+
+            if (SelectedFilterEntry.Name == "Octree Color Quantization") // Load function color settings
+            {
+                FilterFunctionQuantizationSettings.Visibility = Visibility.Visible;
             }
 
             if ((SelectedFilterEntry.Filter as FunctionFilter).Function is FunctionGraph) // Load function graph viewer if function graph is available in filter
@@ -561,8 +568,14 @@ namespace cgshop
 
         private void K_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            // Update parameters in function
+            // Update parameters in dithering function
             ((selectedFilterEntry.Filter as FunctionFilter).Function as FunctionFormula).otherFunctionParams[0] = new int[] { (int)bKInput.Value, (int)gKInput.Value, (int)rKInput.Value };
+        }
+
+        private void C_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            // Update parameters in quantizing function
+            //((selectedFilterEntry.Filter as FunctionFilter).Function as FunctionFormula).otherFunctionParams[0] = new int[] { (int)bKInput.Value, (int)gKInput.Value, (int)rKInput.Value };
         }
     }
 }

@@ -101,7 +101,7 @@
                                     <StackPanel Name="FunctionFilterListButton"/>
 
                                     <Grid Name="FilterFunctionSettings" Visibility="Collapsed">
-                                        <StackPanel Name="FilterFunctionOtherSettings" Margin="0">
+                                        <StackPanel Name="FilterFunctionDitheringSettings" Margin="0">
                                             <Separator/>
                                             <DockPanel>
                                                 <Label Content="K: Red Channel" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"/>
@@ -116,7 +116,16 @@
                                                 <wT:IntegerUpDown x:Name="bKInput" HorizontalAlignment="Right" Margin="0" DefaultValue="4" Text="4" Height="20" ValueChanged="K_ValueChanged" Minimum="2" Maximum="255"  VerticalAlignment="Center"/>
                                             </DockPanel>
                                         </StackPanel>
-                                        
+
+                                        <StackPanel Name="FilterFunctionQuantizationSettings" Margin="0">
+                                            <Separator/>
+                                            <DockPanel>
+                                                <Label Content="Number of colors" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                                <wT:IntegerUpDown x:Name="quantizationColorInput" HorizontalAlignment="Right" Margin="0" DefaultValue="4" Text="4" Height="20" ValueChanged="C_ValueChanged" Minimum="2" Maximum="255" VerticalAlignment="Center"/>
+                                            </DockPanel>
+                                        </StackPanel>
+
+
                                         <StackPanel Name="FilterFunctionGraphViewer" Margin="0" Visibility="Collapsed">
                                             <Separator/>
                                             <Grid Height="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}">
