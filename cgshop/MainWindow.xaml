@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:cgshop"
         mc:Ignorable="d"
+        xmlns:wT="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
         Title="cgshop - Image Filtering " Height="650" Width="900" Loaded="Window_Loaded" Icon="Res/Logo2.png" KeyDown="Window_KeyDown" >
 
 
@@ -79,7 +80,7 @@
                                     <ItemsControl Name="FunctionFilterEntriesList"  ItemsSource="{Binding }">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <RadioButton HorizontalContentAlignment="Stretch" FocusVisualStyle="{x:Null}" Checked="FunctionFilterEntry_Checked" GroupName = "Filters" >
+                                                <RadioButton HorizontalContentAlignment="Stretch" FocusVisualStyle="{x:Null}" Checked="FunctionFilterEntry_Checked" Unchecked="FunctionFilterEntry_Unchecked" GroupName = "Filters" >
                                                     <Grid>
                                                         <Label Content="{ Binding Name }" Padding="0" MouseDoubleClick="FilterName_MouseDoubleClick"/>
                                                         <TextBox MinWidth="100" Visibility="Collapsed" Text="{ Binding Name , Mode=TwoWay }" KeyDown="FilterName_KeyDown"/>
@@ -99,8 +100,24 @@
                                     </ItemsControl>
                                     <StackPanel Name="FunctionFilterListButton"/>
 
-                                    <Grid>
-                                        <StackPanel Name="FilterFunctionGraphViewer" Margin="0">
+                                    <Grid Name="FilterFunctionSettings" Visibility="Collapsed">
+                                        <StackPanel Name="FilterFunctionOtherSettings" Margin="0">
+                                            <Separator/>
+                                            <DockPanel>
+                                                <Label Content="K: Red Channel" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                                <wT:IntegerUpDown x:Name="rKInput" HorizontalAlignment="Right" Margin="0" DefaultValue="4" Text="4" Height="20" ValueChanged="K_ValueChanged" Minimum="2" Maximum="255" VerticalAlignment="Center"/>
+                                            </DockPanel>
+                                            <DockPanel>
+                                                <Label Content="K: Green Channel" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                                <wT:IntegerUpDown x:Name="gKInput" HorizontalAlignment="Right" Margin="0" DefaultValue="4" Text="4" Height="20" ValueChanged="K_ValueChanged" Minimum="2" Maximum="255" VerticalAlignment="Center"/>
+                                            </DockPanel>
+                                            <DockPanel >
+                                                <Label Content="K: Blue Channel" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                                <wT:IntegerUpDown x:Name="bKInput" HorizontalAlignment="Right" Margin="0" DefaultValue="4" Text="4" Height="20" ValueChanged="K_ValueChanged" Minimum="2" Maximum="255"  VerticalAlignment="Center"/>
+                                            </DockPanel>
+                                        </StackPanel>
+                                        
+                                        <StackPanel Name="FilterFunctionGraphViewer" Margin="0" Visibility="Collapsed">
                                             <Separator/>
                                             <Grid Height="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}">
                                                 <Canvas Margin="5" Background="#FFE6E6E6" PreviewMouseLeftButtonDown="FunctionGraphViewer_PreviewMouseLeftButtonDown" >

@@ -202,6 +202,9 @@ namespace cgshop
             unsafe
             {
                 byte* pBuffer = (byte*)bitmap.BackBuffer; // Pointer to actual image data in buffer (BGRA32 format (1 byte for each channel))
+                
+
+
 
                 // Precalculate slope factors of functions between points
                 List<(double, double)> functionFactors = new List<(double, double)>();
@@ -282,7 +285,7 @@ namespace cgshop
     public class FunctionFormula : IFunction
     {
         public FilterSettings.FunctionFormula_Formula Formula { get; }
-        object[] otherFunctionParams;
+        public object[] otherFunctionParams;
 
         public FunctionFormula(FilterSettings.FunctionFormula_Formula functionFormula, params object[] otherFunctionParams)
         {
@@ -294,36 +297,10 @@ namespace cgshop
         {
             var bitmap = new WriteableBitmap(original);
 
-            int width = bitmap.PixelWidth;
-            int height = bitmap.PixelHeight;
-            int stride = bitmap.BackBufferStride;
-            int bytesPerPixel = (bitmap.Format.BitsPerPixel + 7) / 8;
-
             bitmap.Lock();
 
-            unsafe
-            {
-                byte* pBuffer = (byte*)bitmap.BackBuffer; // Pointer to actual image data in buffer (BGRA32 format (1 byte for each channel))
-
-
-
-
-                for (int y = 0; y < height; y++)
-                {
-                    for (int x = 0; x < width; x++)
-                    {
-                        int[] pixel = new int[4];
-
-                        for (int i = 0; i < 4; i++)
-                            pixel[i] = pBuffer[4 * x + (y * bitmap.BackBufferStride) + i];
-
-                        int[] result = Formula(pixel, otherFunctionParams);
-
-                        for (int i = 0; i < 4; i++)
-                            pBuffer[4 * x + (y * bitmap.BackBufferStride) + i] = (byte)result[i];
-                    }
-                }    
-            }
+            byte* pBuffer = (byte*)bitmap.BackBuffer; // Pointer to actual image data in buffer (BGRA32 format (1 byte for each channel))
+            Formula(pBuffer, bitmap, otherFunctionParams);
 
             bitmap.Unlock();
 

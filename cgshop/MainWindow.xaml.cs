@@ -22,6 +22,7 @@ using System.Windows.Shapes;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Xceed.Wpf.Toolkit;
 
 namespace cgshop
 {
@@ -74,6 +75,8 @@ namespace cgshop
             originalImage = currentImage = new BitmapImage(new Uri("/Res/ClaymoreRoomba.png", UriKind.Relative));
             Viewer.Source = originalImage;
             FilterFunctionGraphViewer.Visibility = Visibility.Collapsed;
+            FilterFunctionSettings.Visibility = Visibility.Collapsed;
+            FilterFunctionOtherSettings.Visibility = Visibility.Collapsed;
 
             // ------------ Function filters ------------
             activeDraggingPoints = new List<Ellipse>();
@@ -85,8 +88,12 @@ namespace cgshop
             functionFilterEntries.Add(new FilterEntry("Inversion", new FunctionFilter(new FunctionGraph(new Graph(FilterSettings.inversionFunctionPoints.ConvertAll(p => new GraphPoint((int)p.Value.X, (int)p.Value.Y)))))));
             functionFilterEntries.Add(new FilterEntry("Brightness Correction", new FunctionFilter(new FunctionGraph(new Graph(FilterSettings.brightnessCorrectionFunctionPoints.ConvertAll(p => new GraphPoint((int)p.Value.X, (int)p.Value.Y)))))));
             functionFilterEntries.Add(new FilterEntry("Contrast Enhancement", new FunctionFilter(new FunctionGraph(new Graph(FilterSettings.contrastEnhancementFunctionPoints.ConvertAll(p => new GraphPoint((int)p.Value.X, (int)p.Value.Y)))))));
-            functionFilterEntries.Add(new FilterEntry("Gamma Correction", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateGamma), FilterSettings.gammaCoefficient))));
-            functionFilterEntries.Add(new FilterEntry("Grayscale", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateGrayscale)))));
+            unsafe
+            {
+                functionFilterEntries.Add(new FilterEntry("Gamma Correction", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateGamma), FilterSettings.gammaCoefficient))));
+                functionFilterEntries.Add(new FilterEntry("Grayscale", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateGrayscale)))));
+                functionFilterEntries.Add(new FilterEntry("Average Dithering", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateAverageDithering), FilterSettings.averageDitheringK))));
+            }
 
 
             // Add new filter button
@@ -322,8 +329,17 @@ namespace cgshop
             return new Point(x, y);
         }
 
+        private void FunctionFilterEntry_Unchecked(object sender, RoutedEventArgs e)
+        {
+            FilterFunctionSettings.Visibility = Visibility.Collapsed;
+            FilterFunctionOtherSettings.Visibility = Visibility.Collapsed;
+            FilterFunctionGraphViewer.Visibility = Visibility.Collapsed;
+        }
+        
         private void FunctionFilterEntry_Checked(object sender, RoutedEventArgs e)
         {
+            FilterFunctionSettings.Visibility = Visibility.Visible;
+
             int index = -1;
             RadioButton btn = sender as RadioButton;
             if (btn != null)
@@ -334,6 +350,12 @@ namespace cgshop
             }
 
             SelectedFilterEntry = functionFilterEntries[index];
+
+
+            if (SelectedFilterEntry.Name == "Average Dithering") // Load function K settings
+            {
+                FilterFunctionOtherSettings.Visibility = Visibility.Visible;
+            }
 
             if ((SelectedFilterEntry.Filter as FunctionFilter).Function is FunctionGraph) // Load function graph viewer if function graph is available in filter
             {
@@ -498,7 +520,8 @@ namespace cgshop
                     index = ConvolutionFilterEntriesList.Items.IndexOf(item);
             }
 
-            FilterFunctionGraphViewer.Visibility = Visibility.Collapsed;
+            //FilterFunctionGraphViewer.Visibility = Visibility.Collapsed;
+            //FilterFunctionSettings.Visibility = Visibility.Collapsed;
             SelectedFilterEntry = convolutionFilterEntries[index];
         }
 
@@ -536,6 +559,10 @@ namespace cgshop
             convolutionFilterEntries.RemoveAt(index);           
         }
 
-
+        private void K_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            // Update parameters in function
+            ((selectedFilterEntry.Filter as FunctionFilter).Function as FunctionFormula).otherFunctionParams[0] = new int[] { (int)bKInput.Value, (int)gKInput.Value, (int)rKInput.Value };
+        }
     }
 }

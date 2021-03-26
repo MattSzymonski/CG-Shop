@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 
 namespace cgshop
 {
@@ -29,39 +30,51 @@ namespace cgshop
 
 
         // --- Function filters: Formula ---
-        public delegate int[] FunctionFormula_Formula(int[] pixel,  params object[] otherParams);
+        public unsafe delegate void FunctionFormula_Formula(byte* pBuffer, WriteableBitmap bitmap, params object[] otherParams);
         public static FunctionFormula_Formula functionFormula_Formula;
 
         public static double gammaCoefficient = 3.0;
-        public static int[] CalculateGamma(int[] pixel, params object[] otherParams)
+        public static unsafe void CalculateGamma(byte* pBuffer, WriteableBitmap bitmap, params object[] otherParams)
         {
+            int width = bitmap.PixelWidth;
+            int height = bitmap.PixelHeight;
+            int stride = bitmap.BackBufferStride;
+            int bytesPerPixel = (bitmap.Format.BitsPerPixel + 7) / 8;
+
             if (otherParams.Length != 1)
                 throw new Exception("Wrong additional parameters passed to Calculate Gamma function");
-            
-            double gammaCoefficient = (double)otherParams[0];
-            int[] result = pixel;
 
-            for (int i = 0; i < 3; i++) // For each color channel
+            for (int y = 0; y < height; y++)
             {
-                result[i] = Utils.Clamp((int)(255 * Math.Pow((double)pixel[i] / 255, 1 / gammaCoefficient)), 0, 255);
-            }
+                for (int x = 0; x < width; x++)
+                {
+                    double gammaCoefficient = (double)otherParams[0];
 
-            return result;
+                    for (int i = 0; i < 3; i++) // For each color channel
+                    {
+                        pBuffer[4 * x + (y * bitmap.BackBufferStride) + i] = (byte)Utils.Clamp((int)(255 * Math.Pow((double)pBuffer[4 * x + (y * bitmap.BackBufferStride) + i] / 255, 1 / gammaCoefficient)), 0, 255);
+                    }
+                }
+            }
         }
 
-
-        public static int[] CalculateGrayscale(int[] pixel, params object[] otherParams)
+        public static unsafe void CalculateGrayscale(byte* pBuffer, WriteableBitmap bitmap, params object[] otherParams)
         {
-            int[] result = pixel;
+            int width = bitmap.PixelWidth;
+            int height = bitmap.PixelHeight;
 
-            byte gray = (byte)(pixel[0] * .21 + pixel[1] * .71 + pixel[2] * .071);
-
-            for (int i = 0; i < 3; i++) // For each color channel
+            for (int y = 0; y < height; y++)
             {
-                result[i] = gray;
-            }
+                for (int x = 0; x < width; x++)
+                {
+                    byte gray = (byte)(pBuffer[4 * x + (y * bitmap.BackBufferStride) + 0] * .21 + pBuffer[4 * x + (y * bitmap.BackBufferStride) + 1] * .71 + pBuffer[4 * x + (y * bitmap.BackBufferStride) + 2] * .071);
 
-            return result; 
+                    for (int i = 0; i < 3; i++) // For each color channel
+                    {
+                        pBuffer[4 * x + (y * bitmap.BackBufferStride) + i] = gray;
+                    }
+                }
+            }
         }
 
 
@@ -69,73 +82,99 @@ namespace cgshop
 
         class LevelInterval
         {
-            public int intervalStart;
-            public int intervalEnd;
+            public int intervalStart = 0;
+            public int intervalEnd = 0;
+            public int intervalLength = 0;
 
             public int pixelCount = 0;
             public int pixelSum = 0;
             public int threshold = 0;
 
-            public void AddPixelToInterval(int pixel)
+            public LevelInterval(int intervalLength, int index)
             {
-                pixelSum += pixel;
+                this.intervalStart = intervalLength * index;
+                this.intervalEnd = intervalLength * (index + 1);
+                this.intervalLength = intervalLength;
+            }
+
+            public void AddPixelValueToInterval(int value)
+            {
+                pixelSum += value;
                 pixelCount++;
             }
 
             public void CalculateAverageThreshold()
             {
-                threshold = pixelSum / threshold;
+                if (pixelCount != 0)
+                    threshold = pixelSum / pixelCount;
+                else
+                    threshold = intervalStart + ((int)intervalLength / 2);
             }
 
         }
 
-        public static int[] CalculateAverageDithering(int[] pixel, params object[] otherParams)
+
+
+        public static int[] averageDitheringK = { 4, 4, 4 };
+        public static unsafe void CalculateAverageDithering(byte* pBuffer, WriteableBitmap bitmap, params object[] otherParams)
         {
-            int[] result = pixel;
-            int K = (int)otherParams[0];
+            int width = bitmap.PixelWidth;
+            int height = bitmap.PixelHeight;
+            List<List<LevelInterval>> levelIntervals = new List<List<LevelInterval>>();
 
-            int intervalLength = 255 / (K - 1);
+            // Set up intervals for each channel
+            for (int c = 0; c < 3; c++)
+            {
+                int K = (int)((int[])otherParams[0])[c];
+                List<LevelInterval> channelLevelIntervals = new List<LevelInterval>();
+                for (int i = 0; i < K - 1; i++)
+                {
+                    channelLevelIntervals.Add(new LevelInterval(255 / (K - 1), i));
+                }
+                levelIntervals.Add(channelLevelIntervals);
+            }
 
-            LevelInterval[] levelIntervals = new LevelInterval[K - 1];
+            // Sum channel values for each interval to calculate threshold
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    for (int i = 0; i < 3; i++) // For each color channel
+                    {
+                        int channelValue = pBuffer[4 * x + (y * bitmap.BackBufferStride) + i];
+                        int intervalIndex = (int)Math.Floor((double)(channelValue / (levelIntervals[i][0].intervalLength + 1)));
+                        levelIntervals[i][intervalIndex].AddPixelValueToInterval(channelValue);
+                    }
+                }
+            }
 
-
-            // Foreach pixel
-            int intervalIndex = Math.Floor(pixel / intervalLength);
-            levelIntervals[intervalIndex].AddPixelToInterval(pixel);
-
-
-            //After last pixel
+            // After last pixel, calculate threshold
             foreach (var levelInterval in levelIntervals)
             {
-                levelInterval.CalculateAverageThreshold();
+                foreach (var channelLevelInterval in levelInterval)
+                {
+                    channelLevelInterval.CalculateAverageThreshold();
+                }
             }
 
-            // Foreach pixel
-            int intervalIndex = Math.Floor(pixel / intervalLength);
-            levelIntervals[intervalIndex].AddPixelToInterval(pixel);
-
-            LevelInterval levelInterval = levelIntervals[intervalIndex];
-
-            if (pixel < levelInterval.threshold)
+            // Set new values
+            for (int y = 0; y < height; y++)
             {
-                pixel = levelInterval.intervalStart;
+                for (int x = 0; x < width; x++)
+                {
+                    for (int i = 0; i < 3; i++) // For each color channel
+                    {
+                        int channelValue = pBuffer[4 * x + (y * bitmap.BackBufferStride) + i];
+                        int intervalIndex = (int)Math.Floor((double)(channelValue / (levelIntervals[i][0].intervalLength + 1)));
+                        LevelInterval interval = levelIntervals[i][intervalIndex];
+
+                        if (channelValue < interval.threshold)
+                            pBuffer[4 * x + (y * bitmap.BackBufferStride) + i] = (byte)interval.intervalStart;
+                        else
+                            pBuffer[4 * x + (y * bitmap.BackBufferStride) + i] = (byte)interval.intervalEnd;
+                    }
+                }
             }
-            else
-            {
-                pixel = levelInterval.intervalEnd;
-            }
-
-
-
-
-            byte gray = (byte)(pixel[0] * .21 + pixel[1] * .71 + pixel[2] * .071);
-
-            for (int i = 0; i < 3; i++) // For each color channel
-            {
-                result[i] = gray;
-            }
-
-            return result;
         }
 
 
