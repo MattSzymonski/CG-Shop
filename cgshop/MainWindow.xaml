@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:cgshop"
         mc:Ignorable="d"
         xmlns:wT="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
-        Title="cgshop - Image Filtering " Height="650" Width="900" Loaded="Window_Loaded" Icon="Res/Logo2.png" KeyDown="Window_KeyDown" >
+        Title="cgshop - Image Filtering " Height="650" Width="1150" Loaded="Window_Loaded" Icon="Res/Logo2.png" KeyDown="Window_KeyDown" >
 
 
     <Window.Resources>
@@ -49,7 +49,7 @@
                 <ColumnDefinition Width ="300" MinWidth="300" MaxWidth="300"/>
             </Grid.ColumnDefinitions >
 
-            <Image Name="Viewer" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" />
+            <Image Name="Viewer" Stretch="None" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" />
             <GridSplitter Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" />
             <Rectangle Grid.Row="0" Grid.Column="2" Fill="White"/>
 
@@ -121,7 +121,7 @@
                                             <Separator/>
                                             <DockPanel>
                                                 <Label Content="Number of colors" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"/>
-                                                <wT:IntegerUpDown x:Name="quantizationColorInput" HorizontalAlignment="Right" Margin="0" DefaultValue="4" Text="4" Height="20" ValueChanged="C_ValueChanged" Minimum="2" Maximum="255" VerticalAlignment="Center"/>
+                                                <wT:IntegerUpDown x:Name="quantizationColorInput" HorizontalAlignment="Right" Margin="0" DefaultValue="16" Text="16" Height="20" ValueChanged="C_ValueChanged" Minimum="1" Maximum="255" VerticalAlignment="Center"/>
                                             </DockPanel>
                                         </StackPanel>
 

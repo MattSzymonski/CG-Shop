@@ -77,9 +77,37 @@ namespace cgshop
             }
         }
 
+        public static int octreeColorQuantization_maxColors = 16;
+        public static unsafe void CalculateOctreeColorQuantization(byte* pBuffer, WriteableBitmap bitmap, params object[] otherParams)
+        {
+            int width = bitmap.PixelWidth;
+            int height = bitmap.PixelHeight;
+            int maxColors = (int)otherParams[0];
 
+            OctreeColorQuantizer octreeColorQuantizer = new OctreeColorQuantizer(maxColors);
+            
+            for (int y = 0; y < height; y++) // Prepare quantization
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    octreeColorQuantizer.AddPixelColor(pBuffer[4 * x + (y * bitmap.BackBufferStride) + 0], pBuffer[4 * x + (y * bitmap.BackBufferStride) + 1], pBuffer[4 * x + (y * bitmap.BackBufferStride) + 2]);
+                }
+            }
 
+            for (int y = 0; y < height; y++) // Write new pixel values from generated palette
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    (int b, int g, int r) newColor = octreeColorQuantizer.GetNearestPaletteColor(pBuffer[4 * x + (y * bitmap.BackBufferStride) + 0], pBuffer[4 * x + (y * bitmap.BackBufferStride) + 1], pBuffer[4 * x + (y * bitmap.BackBufferStride) + 2]);
 
+                    pBuffer[4 * x + (y * bitmap.BackBufferStride) + 0] = (byte)newColor.b;
+                    pBuffer[4 * x + (y * bitmap.BackBufferStride) + 1] = (byte)newColor.g;
+                    pBuffer[4 * x + (y * bitmap.BackBufferStride) + 2] = (byte)newColor.r;
+                }
+            }
+        }
+
+        public static int[] averageDithering_k = { 4, 4, 4 };
         class LevelInterval
         {
             public int intervalStart = 0;
@@ -111,11 +139,7 @@ namespace cgshop
                     threshold = intervalStart + ((int)intervalLength / 2);
             }
 
-        }
-
-
-
-        public static int[] averageDitheringK = { 4, 4, 4 };
+        }      
         public static unsafe void CalculateAverageDithering(byte* pBuffer, WriteableBitmap bitmap, params object[] otherParams)
         {
             int width = bitmap.PixelWidth;

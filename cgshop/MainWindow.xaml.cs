@@ -3,7 +3,6 @@
 
 
 // README
-// Every task is completed
 // To graph point select one with left mouse button and press delete key on keyboard
 // To add new graph point click with left mouse button on polyline
 // Moving graph points might be a bit inconvenient but it fully works, (just move mouse slowly to avoid loosing focus on graph point and stoping moving it)
@@ -93,7 +92,8 @@ namespace cgshop
             {
                 functionFilterEntries.Add(new FilterEntry("Gamma Correction", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateGamma), FilterSettings.gammaCoefficient))));
                 functionFilterEntries.Add(new FilterEntry("Grayscale", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateGrayscale)))));
-                functionFilterEntries.Add(new FilterEntry("Average Dithering", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateAverageDithering), FilterSettings.averageDitheringK))));
+                functionFilterEntries.Add(new FilterEntry("Average Dithering", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateAverageDithering), FilterSettings.averageDithering_k))));
+                functionFilterEntries.Add(new FilterEntry("Octree Color Quantization", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateOctreeColorQuantization), FilterSettings.octreeColorQuantization_maxColors))));
             }
 
 
@@ -575,7 +575,7 @@ namespace cgshop
         private void C_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             // Update parameters in quantizing function
-            //((selectedFilterEntry.Filter as FunctionFilter).Function as FunctionFormula).otherFunctionParams[0] = new int[] { (int)bKInput.Value, (int)gKInput.Value, (int)rKInput.Value };
+            ((selectedFilterEntry.Filter as FunctionFilter).Function as FunctionFormula).otherFunctionParams[0] = new int[] { (int)quantizationColorInput.Value };
         }
     }
 }
