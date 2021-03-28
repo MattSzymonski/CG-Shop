@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Media.Imaging;
 
 namespace cgshop
@@ -201,6 +202,67 @@ namespace cgshop
 
 
         // --- Convolution filters ---
+
+
+        public static unsafe void CalculateGraph(byte* pBuffer, WriteableBitmap bitmap, params object[] otherParams)
+        {
+            int width = bitmap.PixelWidth;
+            int height = bitmap.PixelHeight;
+            int stride = bitmap.BackBufferStride;
+            int bytesPerPixel = (bitmap.Format.BitsPerPixel + 7) / 8;
+
+
+            List<GraphPoint> graphPoints = (otherParams[0] as Graph).points;
+
+            List<(double, double)> functionFactors = new List<(double, double)>();
+            for (int i = 0; i < graphPoints.Count - 1; i++)
+            {
+                double slopeFactor = (graphPoints[i + 1].Value.Y - graphPoints[i].Value.Y) / (graphPoints[i + 1].Value.X - graphPoints[i].Value.X);
+                double constant = graphPoints[i + 1].Value.Y - slopeFactor * graphPoints[i + 1].Value.X;
+                functionFactors.Add((slopeFactor, constant));
+            }
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    // Find new value in graph function
+                    for (int i = 0; i < 3; i++) // For each channel
+                    {
+                        for (int p = 0; p < graphPoints.Count - 1; p++)
+                        {
+                            int pixelChannelValue = (int)pBuffer[4 * x + (y * bitmap.BackBufferStride) + i];
+
+                            Point pointOnLeftValue = graphPoints[p].Value;
+                            Point pointOnRightValue = graphPoints[p + 1].Value;
+
+                            if (pixelChannelValue >= pointOnRightValue.X) // Incorrect interval (go to next interval on right)
+                            {
+                                if (pixelChannelValue == pointOnRightValue.X) // Edge
+                                {
+                                    pBuffer[4 * x + (y * bitmap.BackBufferStride) + i] = (byte)pointOnRightValue.Y;
+                                    break;
+                                }
+                            }
+                            else // Correct interval
+                            {
+                                if (pixelChannelValue == pointOnLeftValue.X) // Edge
+                                {
+                                    pBuffer[4 * x + (y * bitmap.BackBufferStride) + i] = (byte)pointOnLeftValue.Y;
+                                    break;
+                                }
+
+                                // Calculate new value for pixel
+                                pBuffer[4 * x + (y * bitmap.BackBufferStride) + i] = (byte)((functionFactors[p].Item1 * pixelChannelValue) + functionFactors[p].Item2);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
 
         // Row count, Column count
         public static double blurDivisor = 9;

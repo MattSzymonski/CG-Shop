@@ -11,15 +11,27 @@ using System.Windows.Media.Imaging;
 
 
 
+
+
+
 namespace cgshop
 {
+    public enum FilterEntryType
+    {
+        Graph,
+        Function,
+        Convolution,
+    }
+
     public class FilterEntry
     {
+        public FilterEntryType Type { get; }
         public string Name { get; set; }
         public IFilter Filter { get; }
 
-        public FilterEntry(string name, IFilter filter)
+        public FilterEntry(FilterEntryType type, string name, IFilter filter)
         {
+            this.Type = type;
             this.Name = name;
             this.Filter = filter;
         }
@@ -35,9 +47,9 @@ namespace cgshop
     [Serializable]
     public class FunctionFilter : IFilter
     {
-        public IFunction Function { get; set; }
+        public FunctionFormula Function { get; set; }
 
-        public FunctionFilter(IFunction function)
+        public FunctionFilter(FunctionFormula function)
         {
             this.Function = function;
         }
@@ -169,117 +181,8 @@ namespace cgshop
 
     }
 
-
-
-
-
-    public interface IFunction
-    {
-        unsafe BitmapImage Apply(BitmapImage original);
-    }
-
     [Serializable]
-    public class FunctionGraph : IFunction
-    {
-        public Graph Graph { get; }
-
-        public FunctionGraph(Graph functionGraph)
-        {
-            this.Graph = functionGraph;
-        }
-
-        public unsafe BitmapImage Apply(BitmapImage original)
-        {
-            var bitmap = new WriteableBitmap(original);
-
-            int width = bitmap.PixelWidth;
-            int height = bitmap.PixelHeight;
-            int stride = bitmap.BackBufferStride;
-            int bytesPerPixel = (bitmap.Format.BitsPerPixel + 7) / 8;
-
-            bitmap.Lock();
-
-            unsafe
-            {
-                byte* pBuffer = (byte*)bitmap.BackBuffer; // Pointer to actual image data in buffer (BGRA32 format (1 byte for each channel))
-
-                // Precalculate slope factors of functions between points
-                List<(double, double)> functionFactors = new List<(double, double)>();
-                for (int i = 0; i < Graph.points.Count - 1; i++)
-                {
-                    double slopeFactor = (Graph.points[i + 1].Value.Y - Graph.points[i].Value.Y) / (Graph.points[i + 1].Value.X - Graph.points[i].Value.X);
-                    double constant = Graph.points[i + 1].Value.Y - slopeFactor * Graph.points[i + 1].Value.X;
-                    functionFactors.Add((slopeFactor, constant));
-                }
-
-                for (int y = 0; y < height; y++)
-                {
-                    for (int x = 0; x < width; x++)
-                    {
-                        // Find new value in graph function
-                        for (int i = 0; i < 3; i++) // For each channel
-                        {
-                            for (int p = 0; p < Graph.points.Count - 1; p++)
-                            {
-                                int pixelChannelValue = (int)pBuffer[4 * x + (y * bitmap.BackBufferStride) + i];
-
-                                Point pointOnLeftValue = Graph.points[p].Value;
-                                Point pointOnRightValue = Graph.points[p + 1].Value;
-
-                                if (pixelChannelValue >= pointOnRightValue.X) // Incorrect interval (go to next interval on right)
-                                {
-                                    if (pixelChannelValue == pointOnRightValue.X) // Edge
-                                    {
-                                        pBuffer[4 * x + (y * bitmap.BackBufferStride) + i] = (byte)pointOnRightValue.Y;
-                                        break;
-                                    }
-                                }
-                                else // Correct interval
-                                {
-                                    if (pixelChannelValue == pointOnLeftValue.X) // Edge
-                                    {
-                                        pBuffer[4 * x + (y * bitmap.BackBufferStride) + i] = (byte)pointOnLeftValue.Y;
-                                        break;
-                                    }
-
-                                    // Calculate new value for pixel
-                                    pBuffer[4 * x + (y * bitmap.BackBufferStride) + i] = (byte)((functionFactors[p].Item1 * pixelChannelValue) + functionFactors[p].Item2);
-                                    break;
-                                }
-                            }
-                        }
-
-                        //// Index is byte offset
-                        //var bluePixelByte = pBuffer[4 * x + (y * bitmap.BackBufferStride)] = 0;
-                        //var greenPixelByte = pBuffer[4 * x + (y * bitmap.BackBufferStride) + 1] = 255;
-                        //var redPixelByte = pBuffer[4 * x + (y * bitmap.BackBufferStride) + 2] = 0;
-                        //var alphaPixelByte = pBuffer[4 * x + (y * bitmap.BackBufferStride) + 3] = 255;
-                    }
-                }
-            }
-
-            bitmap.Unlock();
-
-            // Convert WritableBitmap to BitmapImage
-            BitmapImage bitmapImage = new BitmapImage();
-            using (MemoryStream stream = new MemoryStream())
-            {
-                PngBitmapEncoder encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(bitmap));
-                encoder.Save(stream);
-                bitmapImage.BeginInit();
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.StreamSource = stream;
-                bitmapImage.EndInit();
-                bitmapImage.Freeze();
-            }
-
-            return bitmapImage;
-        }
-    }
-
-    [Serializable]
-    public class FunctionFormula : IFunction
+    public class FunctionFormula
     {
         public FilterSettings.FunctionFormula_Formula Formula { get; }
         public object[] otherFunctionParams;

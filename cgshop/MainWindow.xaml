@@ -100,7 +100,7 @@
                                     </ItemsControl>
                                     <StackPanel Name="FunctionFilterListButton"/>
 
-                                    <Grid Name="FilterFunctionSettings" Visibility="Collapsed">
+                                    <Grid Name="FilterFunctionSettings" Visibility="Visible">
                                         <StackPanel Name="FilterFunctionDitheringSettings" Margin="0">
                                             <Separator/>
                                             <DockPanel>
@@ -126,7 +126,7 @@
                                         </StackPanel>
 
 
-                                        <StackPanel Name="FilterFunctionGraphViewer" Margin="0" Visibility="Collapsed">
+                                        <StackPanel Name="FilterFunctionGraphViewer" Margin="0" Visibility="Visible">
                                             <Separator/>
                                             <Grid Height="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}">
                                                 <Canvas Margin="5" Background="#FFE6E6E6" PreviewMouseLeftButtonDown="FunctionGraphViewer_PreviewMouseLeftButtonDown" >

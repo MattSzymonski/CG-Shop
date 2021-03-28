@@ -85,15 +85,17 @@ namespace cgshop
             functionFilterEntries = new ObservableCollection<FilterEntry>();
             FunctionFilterEntriesList.ItemsSource = functionFilterEntries;
 
-            functionFilterEntries.Add(new FilterEntry("Inversion", new FunctionFilter(new FunctionGraph(new Graph(FilterSettings.inversionFunctionPoints.ConvertAll(p => new GraphPoint((int)p.Value.X, (int)p.Value.Y)))))));
-            functionFilterEntries.Add(new FilterEntry("Brightness Correction", new FunctionFilter(new FunctionGraph(new Graph(FilterSettings.brightnessCorrectionFunctionPoints.ConvertAll(p => new GraphPoint((int)p.Value.X, (int)p.Value.Y)))))));
-            functionFilterEntries.Add(new FilterEntry("Contrast Enhancement", new FunctionFilter(new FunctionGraph(new Graph(FilterSettings.contrastEnhancementFunctionPoints.ConvertAll(p => new GraphPoint((int)p.Value.X, (int)p.Value.Y)))))));
             unsafe
             {
-                functionFilterEntries.Add(new FilterEntry("Gamma Correction", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateGamma), FilterSettings.gammaCoefficient))));
-                functionFilterEntries.Add(new FilterEntry("Grayscale", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateGrayscale)))));
-                functionFilterEntries.Add(new FilterEntry("Average Dithering", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateAverageDithering), FilterSettings.averageDithering_k))));
-                functionFilterEntries.Add(new FilterEntry("Octree Color Quantization", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateOctreeColorQuantization), FilterSettings.octreeColorQuantization_maxColors))));
+
+                functionFilterEntries.Add(new FilterEntry(FilterEntryType.Graph, "Inversion", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateGraph), new Graph(FilterSettings.inversionFunctionPoints.ConvertAll(p => new GraphPoint((int)p.Value.X, (int)p.Value.Y)))))));
+                functionFilterEntries.Add(new FilterEntry(FilterEntryType.Graph, "Brightness Correction", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateGraph), new Graph(FilterSettings.brightnessCorrectionFunctionPoints.ConvertAll(p => new GraphPoint((int)p.Value.X, (int)p.Value.Y)))))));
+                functionFilterEntries.Add(new FilterEntry(FilterEntryType.Graph, "Contrast Enhancement", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateGraph), new Graph(FilterSettings.contrastEnhancementFunctionPoints.ConvertAll(p => new GraphPoint((int)p.Value.X, (int)p.Value.Y)))))));
+
+                functionFilterEntries.Add(new FilterEntry(FilterEntryType.Function, "Gamma Correction", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateGamma), FilterSettings.gammaCoefficient))));
+                functionFilterEntries.Add(new FilterEntry(FilterEntryType.Function, "Grayscale", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateGrayscale)))));
+                functionFilterEntries.Add(new FilterEntry(FilterEntryType.Function, "Average Dithering", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateAverageDithering), FilterSettings.averageDithering_k))));
+                functionFilterEntries.Add(new FilterEntry(FilterEntryType.Function, "Octree Color Quantization", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateOctreeColorQuantization), FilterSettings.octreeColorQuantization_maxColors))));
             }
 
 
@@ -105,8 +107,11 @@ namespace cgshop
             addNewFunctionFilterButton.Height = 18;
             addNewFunctionFilterButton.Click += (senderButton, argsButton) =>
             {
-                FilterEntry newFunctionEntry = new FilterEntry("Custom", new FunctionFilter(new FunctionGraph(new Graph(FilterSettings.identityFunctionPoints.ConvertAll(p => new GraphPoint((int)p.Value.X, (int)p.Value.Y))))));
-                functionFilterEntries.Add(newFunctionEntry);
+                unsafe {
+                    FilterEntry newFunctionEntry = new FilterEntry(FilterEntryType.Graph, "Custom", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateGraph), new Graph(FilterSettings.identityFunctionPoints.ConvertAll(p => new GraphPoint((int)p.Value.X, (int)p.Value.Y))))));
+                    functionFilterEntries.Add(newFunctionEntry);
+                }
+                
                 FunctionFilterListButton.Children.RemoveAt(FunctionFilterListButton.Children.Count - 1); // Remove button from stackpanel
                 FunctionFilterListButton.Children.Add(addNewFunctionFilterButton); // Add button again to stackpanel
             };
@@ -118,11 +123,11 @@ namespace cgshop
             convolutionFilterEntries = new ObservableCollection<FilterEntry>();
             ConvolutionFilterEntriesList.ItemsSource = convolutionFilterEntries;
 
-            convolutionFilterEntries.Add(new FilterEntry("Blur", new ConvolutionFilter(FilterSettings.blurKernel, FilterSettings.blurDivisor)));
-            convolutionFilterEntries.Add(new FilterEntry("Gaussinan Blur", new ConvolutionFilter(FilterSettings.gaussianBlurKernel, FilterSettings.gaussianBlurDivisor)));
-            convolutionFilterEntries.Add(new FilterEntry("Sharpen", new ConvolutionFilter(FilterSettings.sharpenKernel, FilterSettings.sharpenDivisor)));
-            convolutionFilterEntries.Add(new FilterEntry("Edge Detection", new ConvolutionFilter(FilterSettings.edgeDetectionKernel, FilterSettings.edgeDetectionDivisor)));
-            convolutionFilterEntries.Add(new FilterEntry("Emboss", new ConvolutionFilter(FilterSettings.embossKernel, FilterSettings.embossDivisor)));
+            convolutionFilterEntries.Add(new FilterEntry(FilterEntryType.Convolution, "Blur", new ConvolutionFilter(FilterSettings.blurKernel, FilterSettings.blurDivisor)));
+            convolutionFilterEntries.Add(new FilterEntry(FilterEntryType.Convolution, "Gaussinan Blur", new ConvolutionFilter(FilterSettings.gaussianBlurKernel, FilterSettings.gaussianBlurDivisor)));
+            convolutionFilterEntries.Add(new FilterEntry(FilterEntryType.Convolution, "Sharpen", new ConvolutionFilter(FilterSettings.sharpenKernel, FilterSettings.sharpenDivisor)));
+            convolutionFilterEntries.Add(new FilterEntry(FilterEntryType.Convolution, "Edge Detection", new ConvolutionFilter(FilterSettings.edgeDetectionKernel, FilterSettings.edgeDetectionDivisor)));
+            convolutionFilterEntries.Add(new FilterEntry(FilterEntryType.Convolution, "Emboss", new ConvolutionFilter(FilterSettings.embossKernel, FilterSettings.embossDivisor)));
 
             //Console.WriteLine(FunctionFilterEntriesList.Items[0]);
             //RadioButton gridInTemplate = (RadioButton)FunctionFilterEntriesList.Template.FindName("Radio", FunctionFilterEntriesList);
@@ -230,7 +235,7 @@ namespace cgshop
                         activeDraggingPoint = null;
 
                         // Remove point from function graph
-                        ((SelectedFilterEntry.Filter as FunctionFilter).Function as FunctionGraph).Graph.points.RemoveAt(index);
+                        (((SelectedFilterEntry.Filter as FunctionFilter).Function as FunctionFormula).otherFunctionParams[0] as Graph).points.RemoveAt(index);
 
                         // Update line
                         functionGraphPoints.RemoveAt(index); 
@@ -276,7 +281,7 @@ namespace cgshop
             activeDraggingPoint.Fill.Opacity = 1;
         }
 
-        void StopDraggingPoint(object point, FunctionGraph selectedFunctionGraph)
+        void StopDraggingPoint(object point, FunctionFormula selectedFunctionGraph)
         {
             if (drag)
             {
@@ -306,7 +311,7 @@ namespace cgshop
                 Canvas.SetTop(draggedItem, position.Y);
 
                 // Set new value to point
-                selectedFunctionGraph.Graph.points[draggedItemIndex].Value = CalculatePointValueFromCanvasPosition(new Point(Canvas.GetLeft(draggedItem), Canvas.GetTop(draggedItem)));
+                (selectedFunctionGraph.otherFunctionParams[0] as Graph).points[draggedItemIndex].Value = CalculatePointValueFromCanvasPosition(new Point(Canvas.GetLeft(draggedItem), Canvas.GetTop(draggedItem)));
 
                 // Update line
                 functionGraphPoints[draggedItemIndex] = new Point(position.X + DRAGGING_POINT_SIZE / 2, position.Y + DRAGGING_POINT_SIZE / 2);
@@ -364,9 +369,9 @@ namespace cgshop
                 FilterFunctionQuantizationSettings.Visibility = Visibility.Visible;
             }
 
-            if ((SelectedFilterEntry.Filter as FunctionFilter).Function is FunctionGraph) // Load function graph viewer if function graph is available in filter
+            if (SelectedFilterEntry.Type == FilterEntryType.Graph) // Load function graph viewer if function graph is available in filter
             {
-                FunctionGraph selectedFunctionGraph = ((SelectedFilterEntry.Filter as FunctionFilter).Function as FunctionGraph);
+                FunctionFormula selectedFunctionGraph = (((SelectedFilterEntry.Filter as FunctionFilter).Function as FunctionFormula));
 
                 //// Draw graph
                 FilterFunctionGraphViewer.Visibility = Visibility.Visible;
@@ -383,7 +388,7 @@ namespace cgshop
                 functionGraphPoints.Clear(); // Remove line
 
                 // Add new dragging points
-                for (int p = 0; p < selectedFunctionGraph.Graph.points.Count; p++)
+                for (int p = 0; p < (selectedFunctionGraph.otherFunctionParams[0] as Graph).points.Count; p++)
                 {
                     CreateDraggingPoint(p);
                 }
@@ -398,7 +403,7 @@ namespace cgshop
                     draggingPoint.Fill.Opacity = 0;
                     draggingPoint.Stroke = new SolidColorBrush(Colors.Black);
 
-                    Point canvasPoint = CalculateCanvasPositionFromPointValue(selectedFunctionGraph.Graph.points[p]);
+                    Point canvasPoint = CalculateCanvasPositionFromPointValue((selectedFunctionGraph.otherFunctionParams[0] as Graph).points[p]);
                     Canvas.SetLeft(draggingPoint, canvasPoint.X);
                     Canvas.SetTop(draggingPoint, canvasPoint.Y);
                     Panel.SetZIndex(draggingPoint, 5); // Higher means top
@@ -496,7 +501,7 @@ namespace cgshop
                     Point newGraphPoint = CalculatePointValueFromCanvasPosition(new Point(mousePosition.X - DRAGGING_POINT_SIZE / 2, mousePosition.Y + DRAGGING_POINT_SIZE / 2));
 
                     // Add new point to graph function
-                    int graphPointIndex = ((SelectedFilterEntry.Filter as FunctionFilter).Function as FunctionGraph).Graph.AddPoint(new GraphPoint((int)newGraphPoint.X, (int)newGraphPoint.Y));
+                    int graphPointIndex =  (((SelectedFilterEntry.Filter as FunctionFilter).Function as FunctionFormula).otherFunctionParams[0] as Graph).AddPoint(new GraphPoint((int)newGraphPoint.X, (int)newGraphPoint.Y));
 
                     Ellipse draggingPoint = CreateDraggingPoint(graphPointIndex);
 
