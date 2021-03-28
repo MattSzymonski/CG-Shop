@@ -1,14 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Windows.Media;
 
 
 // Add pixels as last nodes (leaves) at lowest level (8) by their bits of colors
@@ -22,9 +13,11 @@ using System.Windows.Media;
 
 namespace cgshop
 {
+    
+
     class OctreeNode
     {
-        private static readonly Byte[] bitMask = new Byte[] { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
+       // private static readonly Byte[] bitMask = new Byte[] { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
 
         public OctreeNode parentNode;
         public int treeLevel;
@@ -51,23 +44,18 @@ namespace cgshop
             octreeColorQuantizer.leafCount++;
 
             octreeColorQuantizer.treeLevels[treeLevel].Add(this); // Register this node in list of nodes for each level in octreeColorQuantizer
-            //if (treeLevel < 7)
-            //{
-                
-            //}
-
-        }
+        } 
 
         int GetLeafIndexAtLevel(int b, int g, int r, int level)
         {
             // Binary add bits for provided level
-            return ((b & bitMask[level]) == bitMask[level] ? 4 : 0) | ((g & bitMask[level]) == bitMask[level] ? 2 : 0) | ((r & bitMask[level]) == bitMask[level] ? 1 : 0);
+            return ((b & Utils.bitMask[level]) == Utils.bitMask[level] ? 4 : 0) | ((g & Utils.bitMask[level]) == Utils.bitMask[level] ? 2 : 0) | ((r & Utils.bitMask[level]) == Utils.bitMask[level] ? 1 : 0);
         }
 
         public void AddPixelColor(int b, int g, int r) // level - depth level
         {
             // if this node is a leaf or was trimmed, then increase a color amount
-            if (treeLevel == 8 || trimmed)
+            if (treeLevel == children.Length - 1 || trimmed)
             {
                 blue += b;
                 red += r;
@@ -75,19 +63,20 @@ namespace cgshop
                 
                 pixelCount++;
             }
-            else if (treeLevel < 8) // otherwise goes one level deeper
+            else // if (treeLevel < children.Length - 1) // otherwise go one level deeper
             {
-                // calculates an index for the next leaf
+                // Calculates an index for the next leaf
                 int leafIndex = GetLeafIndexAtLevel(b, g, r, treeLevel);  
 
                 // Create leaf if it doesnt exist
                 if (children[leafIndex] == null)
                 {
-                    children[leafIndex] = new OctreeNode(this, treeLevel + 1, octreeColorQuantizer);
-                    
+                    if (GetChildrenCount() == 0) // About to create first child, so node will not longer be a leaf
+                        octreeColorQuantizer.leafCount--;
+
+                    children[leafIndex] = new OctreeNode(this, treeLevel + 1, octreeColorQuantizer);    
                 }
                     
-
                 // Add pixel color to that leaf
                 children[leafIndex].AddPixelColor(b, g, r);
             }
@@ -127,15 +116,27 @@ namespace cgshop
             return result;
         }
 
+        public void FinalizeColor() // Normalize colors
+        {
+            if (pixelCount != 0)
+            {
+                blue = blue / pixelCount;
+                green = green / pixelCount;
+                red = red / pixelCount;
+            }
+           
+        }
+
         public (int b, int g, int r) GetNearestColor(int b, int g, int r)
         {
-            if (children[GetLeafIndexAtLevel(b, g, r, treeLevel)] != null)
+            int leafIndex = GetLeafIndexAtLevel(b, g, r, treeLevel);
+            if (children[leafIndex] != null)
             {
-                return GetNearestColor(b, g, r); // Child exists so check for final color in it
+                return children[leafIndex].GetNearestColor(b, g, r); // Child exists so check for final color in it
             }
             else
             {
-                return (b, g, r); // No child so this node is final color
+                return (blue, green, red); // No child so this node is final color
             }
         }
     }
@@ -153,6 +154,10 @@ namespace cgshop
         public OctreeColorQuantizer(int maxColors)
         {
             this.maxColors = maxColors;
+
+            for (int i = 0; i < 8; i++)
+                treeLevels[i] = new List<OctreeNode>();
+
             root = new OctreeNode(null, 0, this);
         }
 
@@ -168,25 +173,44 @@ namespace cgshop
             }  
         }
 
-        public void TrimLeaves()
+        private void TrimLeaves()
         {
             for (int l = treeLevels.Length - 2; l >= 0; l--) // For each level (without lowest level)
             {
-                for (int n = 0; n < treeLevels[l].Count; n++) // For each node
+                OctreeNode maxNode = null; // Node with the largest number of children
+                foreach (var node in treeLevels[l])
                 {
-                    OctreeNode selectedNode = treeLevels[l][n];
-                    if (selectedNode.trimmed == false && selectedNode.GetChildrenCount() > 0)
+                    if (node.trimmed == false)
                     {
-                        selectedNode.Trim();
+                        if (maxNode == null)
+                            maxNode = node;
+
+                        if (node.GetChildrenCount() > maxNode.GetChildrenCount())
+                            maxNode = node;
+                    }
+                    if (maxNode != null)
+                    {
+                        maxNode.Trim();
                         if (leafCount < maxColors) // It may happen that node has only one leaf so if we delete it then node itself becomes a leaf
                         {
                             return;
                         }
                     }
-                }
+                }      
             }
 
             throw new Exception("Cannot reduce color palette, not enough leaves");
+        }
+
+        public void FinalizePalette() // Before setting new colors to pixels we need to normalize all colors
+        {
+            for (int l = treeLevels.Length - 1; l >= 0; l--) // For each level
+            {
+                for (int n = 0; n < treeLevels[l].Count; n++) // For each node
+                {
+                    treeLevels[l][n].FinalizeColor();
+                }
+            }
         }
 
         public (int b, int g, int r) GetNearestPaletteColor(int b, int g, int r)

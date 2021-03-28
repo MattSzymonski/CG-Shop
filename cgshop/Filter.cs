@@ -202,9 +202,6 @@ namespace cgshop
             unsafe
             {
                 byte* pBuffer = (byte*)bitmap.BackBuffer; // Pointer to actual image data in buffer (BGRA32 format (1 byte for each channel))
-                
-
-
 
                 // Precalculate slope factors of functions between points
                 List<(double, double)> functionFactors = new List<(double, double)>();

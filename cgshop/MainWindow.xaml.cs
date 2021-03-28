@@ -569,13 +569,15 @@ namespace cgshop
         private void K_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             // Update parameters in dithering function
-            ((selectedFilterEntry.Filter as FunctionFilter).Function as FunctionFormula).otherFunctionParams[0] = new int[] { (int)bKInput.Value, (int)gKInput.Value, (int)rKInput.Value };
+            if (selectedFilterEntry != null) 
+                ((selectedFilterEntry.Filter as FunctionFilter).Function as FunctionFormula).otherFunctionParams[0] = new int[] { (int)bKInput.Value, (int)gKInput.Value, (int)rKInput.Value };
         }
 
         private void C_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             // Update parameters in quantizing function
-            ((selectedFilterEntry.Filter as FunctionFilter).Function as FunctionFormula).otherFunctionParams[0] = new int[] { (int)quantizationColorInput.Value };
+            if (selectedFilterEntry != null)
+                ((selectedFilterEntry.Filter as FunctionFilter).Function as FunctionFormula).otherFunctionParams[0] = (int)quantizationColorInput.Value;
         }
     }
 }

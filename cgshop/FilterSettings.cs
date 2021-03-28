@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
 namespace cgshop
@@ -85,7 +82,7 @@ namespace cgshop
             int maxColors = (int)otherParams[0];
 
             OctreeColorQuantizer octreeColorQuantizer = new OctreeColorQuantizer(maxColors);
-            
+
             for (int y = 0; y < height; y++) // Prepare quantization
             {
                 for (int x = 0; x < width; x++)
@@ -94,15 +91,16 @@ namespace cgshop
                 }
             }
 
+            octreeColorQuantizer.FinalizePalette();
+
             for (int y = 0; y < height; y++) // Write new pixel values from generated palette
             {
                 for (int x = 0; x < width; x++)
                 {
                     (int b, int g, int r) newColor = octreeColorQuantizer.GetNearestPaletteColor(pBuffer[4 * x + (y * bitmap.BackBufferStride) + 0], pBuffer[4 * x + (y * bitmap.BackBufferStride) + 1], pBuffer[4 * x + (y * bitmap.BackBufferStride) + 2]);
-
                     pBuffer[4 * x + (y * bitmap.BackBufferStride) + 0] = (byte)newColor.b;
                     pBuffer[4 * x + (y * bitmap.BackBufferStride) + 1] = (byte)newColor.g;
-                    pBuffer[4 * x + (y * bitmap.BackBufferStride) + 2] = (byte)newColor.r;
+                    pBuffer[4 * x + (y * bitmap.BackBufferStride) + 2] = (byte)newColor.r;        
                 }
             }
         }
@@ -200,8 +198,6 @@ namespace cgshop
                 }
             }
         }
-
-
 
 
         // --- Convolution filters ---
