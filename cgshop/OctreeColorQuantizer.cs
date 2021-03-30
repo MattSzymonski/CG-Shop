@@ -13,26 +13,18 @@ using System.Collections.Generic;
 
 namespace cgshop
 {
-    
-
     class OctreeNode
     {
-       // private static readonly Byte[] bitMask = new Byte[] { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
-
         public OctreeNode parentNode;
         public int treeLevel;
         public OctreeNode[] children;
-
 
         public int red;
         public int green;
         public int blue;
         public int pixelCount;
-
         public bool trimmed; // true if this node had children but they was removed by reducting procedure
-
         public OctreeColorQuantizer octreeColorQuantizer;
-
 
         public OctreeNode(OctreeNode parentNode, int treeLevel, OctreeColorQuantizer octreeColorQuantizer)
         {

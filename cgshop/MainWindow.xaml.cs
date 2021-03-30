@@ -128,12 +128,6 @@ namespace cgshop
             convolutionFilterEntries.Add(new FilterEntry(FilterEntryType.Convolution, "Sharpen", new ConvolutionFilter(FilterSettings.sharpenKernel, FilterSettings.sharpenDivisor)));
             convolutionFilterEntries.Add(new FilterEntry(FilterEntryType.Convolution, "Edge Detection", new ConvolutionFilter(FilterSettings.edgeDetectionKernel, FilterSettings.edgeDetectionDivisor)));
             convolutionFilterEntries.Add(new FilterEntry(FilterEntryType.Convolution, "Emboss", new ConvolutionFilter(FilterSettings.embossKernel, FilterSettings.embossDivisor)));
-
-            //Console.WriteLine(FunctionFilterEntriesList.Items[0]);
-            //RadioButton gridInTemplate = (RadioButton)FunctionFilterEntriesList.Template.FindName("Radio", FunctionFilterEntriesList);
-            //((FunctionFilterEntriesList.Template.FindName("Radio", FunctionFilterEntriesList[0]) as RadioButton).IsChecked = true;
-
-            //SelectedFilterEntry = functionFilterEntries[0];
         }
 
         
@@ -192,6 +186,18 @@ namespace cgshop
         {
             currentImage = SelectedFilterEntry.Filter.Apply(currentImage);      
             Viewer.Source = currentImage;
+
+            // Lab part
+            if (selectedFilterEntry.Name == "Octree Color Quantization")
+            {
+                RGBToYCbCrConverter _RGBToYCbCrConverter = new RGBToYCbCrConverter();
+                var result = _RGBToYCbCrConverter.Apply(currentImage);
+                YCbCrViewerWindow YCbCrViewerWindow = new YCbCrViewerWindow();
+                YCbCrViewerWindow.Image0.Source = result.Y;
+                YCbCrViewerWindow.Image1.Source = result.Cb;
+                YCbCrViewerWindow.Image2.Source = result.Cr;
+                YCbCrViewerWindow.Show();
+            }
         }
 
         private void FunctionGraphViewer_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
