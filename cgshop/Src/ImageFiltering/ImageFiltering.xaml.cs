@@ -25,7 +25,10 @@ using Xceed.Wpf.Toolkit;
 
 namespace cgshop
 {
-    public partial class MainWindow : Window, INotifyPropertyChanged
+    /// <summary>
+    /// Interaction logic for ImageFiltering.xaml
+    /// </summary>
+    public partial class ImageFiltering : Page, INotifyPropertyChanged
     {
         private int DRAGGING_POINT_SIZE = 8;
         private int MINIMAL_DRAGGING_POINT_MARGIN = 8;
@@ -63,13 +66,14 @@ namespace cgshop
         }
 
 
-        public MainWindow()
+        public ImageFiltering()
         {
             InitializeComponent();
             DataContext = this;
+            SetupModule();
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private void SetupModule()
         {
             originalImage = currentImage = new BitmapImage(new Uri("/Res/ClaymoreRoomba.png", UriKind.Relative));
             Viewer.Source = originalImage;
@@ -107,11 +111,12 @@ namespace cgshop
             addNewFunctionFilterButton.Height = 18;
             addNewFunctionFilterButton.Click += (senderButton, argsButton) =>
             {
-                unsafe {
+                unsafe
+                {
                     FilterEntry newFunctionEntry = new FilterEntry(FilterEntryType.Graph, "Custom", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateGraph), new Graph(FilterSettings.identityFunctionPoints.ConvertAll(p => new GraphPoint((int)p.Value.X, (int)p.Value.Y))))));
                     functionFilterEntries.Add(newFunctionEntry);
                 }
-                
+
                 FunctionFilterListButton.Children.RemoveAt(FunctionFilterListButton.Children.Count - 1); // Remove button from stackpanel
                 FunctionFilterListButton.Children.Add(addNewFunctionFilterButton); // Add button again to stackpanel
             };
@@ -130,9 +135,14 @@ namespace cgshop
             convolutionFilterEntries.Add(new FilterEntry(FilterEntryType.Convolution, "Emboss", new ConvolutionFilter(FilterSettings.embossKernel, FilterSettings.embossDivisor)));
         }
 
-        
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+           
+        }
 
-       
+
+
+
 
 
 
@@ -184,7 +194,7 @@ namespace cgshop
 
         private void ButtonApply_Click(object sender, RoutedEventArgs e)
         {
-            currentImage = SelectedFilterEntry.Filter.Apply(currentImage);      
+            currentImage = SelectedFilterEntry.Filter.Apply(currentImage);
             Viewer.Source = currentImage;
 
             // Lab part
@@ -205,7 +215,7 @@ namespace cgshop
             DeselectActiveDraggingPoint();
         }
 
-       
+
 
 
         private void FilterName_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -224,7 +234,7 @@ namespace cgshop
             }
         }
 
-        private void Window_KeyDown(object sender, KeyEventArgs e)
+        private void Page_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Delete) // Removing dragging point
             {
@@ -244,7 +254,7 @@ namespace cgshop
                         (((SelectedFilterEntry.Filter as FunctionFilter).Function as FunctionFormula).otherFunctionParams[0] as Graph).points.RemoveAt(index);
 
                         // Update line
-                        functionGraphPoints.RemoveAt(index); 
+                        functionGraphPoints.RemoveAt(index);
                         functionGraph.Points = functionGraphPoints;
                     }
                 }
@@ -348,7 +358,7 @@ namespace cgshop
             FilterFunctionQuantizationSettings.Visibility = Visibility.Collapsed;
             FilterFunctionGraphViewer.Visibility = Visibility.Collapsed;
         }
-        
+
         private void FunctionFilterEntry_Checked(object sender, RoutedEventArgs e)
         {
             FilterFunctionSettings.Visibility = Visibility.Visible;
@@ -507,7 +517,7 @@ namespace cgshop
                     Point newGraphPoint = CalculatePointValueFromCanvasPosition(new Point(mousePosition.X - DRAGGING_POINT_SIZE / 2, mousePosition.Y + DRAGGING_POINT_SIZE / 2));
 
                     // Add new point to graph function
-                    int graphPointIndex =  (((SelectedFilterEntry.Filter as FunctionFilter).Function as FunctionFormula).otherFunctionParams[0] as Graph).AddPoint(new GraphPoint((int)newGraphPoint.X, (int)newGraphPoint.Y));
+                    int graphPointIndex = (((SelectedFilterEntry.Filter as FunctionFilter).Function as FunctionFormula).otherFunctionParams[0] as Graph).AddPoint(new GraphPoint((int)newGraphPoint.X, (int)newGraphPoint.Y));
 
                     Ellipse draggingPoint = CreateDraggingPoint(graphPointIndex);
 
@@ -574,13 +584,13 @@ namespace cgshop
             if (convolutionFilterEntries[index] == SelectedFilterEntry)
                 SelectedFilterEntry = null;
 
-            convolutionFilterEntries.RemoveAt(index);           
+            convolutionFilterEntries.RemoveAt(index);
         }
 
         private void K_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             // Update parameters in dithering function
-            if (selectedFilterEntry != null) 
+            if (selectedFilterEntry != null)
                 ((selectedFilterEntry.Filter as FunctionFilter).Function as FunctionFormula).otherFunctionParams[0] = new int[] { (int)bKInput.Value, (int)gKInput.Value, (int)rKInput.Value };
         }
 
