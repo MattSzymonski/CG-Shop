@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.Windows.Media.Imaging;
 
 namespace cgshop
 {
@@ -27,12 +27,84 @@ namespace cgshop
         {
             return channels[channel];
         }
+
+        public static Color Lerp(Color a, Color b, float factor)
+        {
+            int rb = (int)Utils.Lerp(a[0], b[0], factor);
+            int rg = (int)Utils.Lerp(a[1], b[1], factor);
+            int rr = (int)Utils.Lerp(a[2], b[2], factor);
+            int ra = (int)Utils.Lerp(a[3], b[3], factor);
+
+            return new Color((byte)rb, (byte)rg, (byte)rr, (byte)ra);
+        }
+
+
     }
+
+    namespace point
+    {
+
+        public class Point
+        {
+            public int X;
+            public int Y;
+
+            public Point(System.Windows.Point point)
+            {
+                this.X = (int)point.X;
+                this.Y = (int)point.Y;
+            }
+
+            public Point(int x, int y)
+            {
+                this.X = x;
+                this.Y = y;
+            }
+
+            public Point(double x, double y)
+            {
+                this.X = (int)x;
+                this.Y = (int)y;
+            }
+
+            public override string ToString()
+            {
+                return "Point: " + X + ", " + Y;
+            }
+
+        }
+    }
+
+   
 
 
     public static class Utils
     {
+        public static float Lerp(float a, float b, float factor)
+        {
+            return a * (1 - factor) + b * factor;
+        }
 
+
+        public unsafe static void SetPixel(byte* pBuffer, WriteableBitmap bitmap, int x, int y, Color color)
+        {
+            if (y > bitmap.Height - 1 || y < 0 || x > bitmap.Width - 1 || x < 0)
+                return;
+
+            for (int i = 0; i < 3; i++) // For each color channel
+            {
+                try
+                {
+                    int index = 4 * x + (y * bitmap.BackBufferStride) + i;
+                    pBuffer[index] = color[i];
+                }
+                catch
+                {
+                    continue;
+                }
+                
+            }
+        }
 
 
         public static T Clamp<T>(this T val, T min, T max) where T : IComparable<T>

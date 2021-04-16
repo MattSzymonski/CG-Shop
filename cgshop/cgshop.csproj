@@ -80,7 +80,10 @@
     <Compile Include="Src\ImageFiltering\OctreeColorQuantizer.cs" />
     <Compile Include="Src\ImageFiltering\RGBToYCbCr.cs" />
     <Compile Include="Src\Utils.cs" />
+    <Compile Include="Src\VectorEditing\Antialiasing.cs" />
+    <Compile Include="Src\VectorEditing\Circle.cs" />
     <Compile Include="Src\VectorEditing\Drawer.cs" />
+    <Compile Include="Src\VectorEditing\Line.cs" />
     <Compile Include="Src\VectorEditing\VectorEditing.xaml.cs">
       <DependentUpon>VectorEditing.xaml</DependentUpon>
     </Compile>
@@ -149,6 +152,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Res\Logo2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Res\Test.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

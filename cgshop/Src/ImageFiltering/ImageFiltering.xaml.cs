@@ -76,6 +76,8 @@ namespace cgshop
         private void SetupModule()
         {
             originalImage = currentImage = new BitmapImage(new Uri("/Res/ClaymoreRoomba.png", UriKind.Relative));
+
+
             Viewer.Source = originalImage;
             FilterFunctionGraphViewer.Visibility = Visibility.Collapsed;
             FilterFunctionSettings.Visibility = Visibility.Collapsed;
@@ -600,5 +602,6 @@ namespace cgshop
             if (selectedFilterEntry != null)
                 ((selectedFilterEntry.Filter as FunctionFilter).Function as FunctionFormula).otherFunctionParams[0] = (int)quantizationColorInput.Value;
         }
+
     }
 }
