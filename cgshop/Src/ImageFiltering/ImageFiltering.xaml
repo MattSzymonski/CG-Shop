@@ -175,7 +175,7 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </GroupBox>
-                        <Button Content="Apply" Height="22" VerticalAlignment="Top" HorizontalContentAlignment="Center"  Margin="0,20,0,0" Click="ButtonApply_Click" IsEnabled="{Binding Path=SelectedFilterEntry, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}, Converter={StaticResource NullToBoolConverter}}" />
+                        <Button Content="Apply" Height="22" VerticalAlignment="Top" HorizontalContentAlignment="Center"  Margin="0,20,0,0" Click="ButtonApply_Click" IsEnabled="{Binding Path=SelectedFilterEntry, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType=Page}, Converter={StaticResource NullToBoolConverter}}" />
                     </StackPanel>
 
                 </Grid>

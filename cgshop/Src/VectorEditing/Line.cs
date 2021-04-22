@@ -15,27 +15,29 @@ namespace cgshop
 {
     public class Line : Shape
     {
-        Point p1;
-        Point p2;
-        int thickness;
-        Color color;
-        bool antialiased;
+        List<Point> points;
+        public int thickness { get; set; }
+        public Color color { get; set; }
+        public bool antialiased { get; set; }
 
-        public Line(Point p1, Point p2, int thickness, Color color)
+        public Line(String name, Point p1, Point p2, int thickness, Color color) : base(name)
         {
-            this.p1 = p1;
-            this.p2 = p2;
+            points = new List<Point>();
+            points.Add(p1);
+            points.Add(p2);
             this.thickness = thickness;
             this.color = color;
         }
 
-        public void ToggleAntialiasing(bool value)
+        public override List<Point> GetPoints()
         {
-            antialiased = value;
+            return points;
         }
 
-        public unsafe BitmapImage Draw(BitmapImage canvas)
+        public override unsafe BitmapImage Draw(BitmapImage canvas)
         {
+            Console.WriteLine("redrawing for points " + points[0].X);
+
             var bitmap = new WriteableBitmap(canvas);
 
             bitmap.Lock();
@@ -47,109 +49,112 @@ namespace cgshop
             int stride = bitmap.BackBufferStride;
             int bytesPerPixel = (bitmap.Format.BitsPerPixel + 7) / 8;
 
+            {
+                Point p1 = points[0];
+                Point p2 = points[1];
 
-            if (!antialiased) { // DDA Algorithm
+                if (!antialiased)
+                { // DDA Algorithm
+                    int dy = p2.Y - p1.Y;
+                    int dx = p2.X - p1.X;
 
-                int dy = p2.Y - p1.Y;
-                int dx = p2.X - p1.X;
+                    int step = Math.Abs(dx) > Math.Abs(dy) ? Math.Abs(dx) : Math.Abs(dy);
 
-                int step = Math.Abs(dx) > Math.Abs(dy) ? Math.Abs(dx) : Math.Abs(dy);
+                    float xInc = dx / (float)step;
+                    float yInc = dy / (float)step;
 
-                float xInc = dx / (float)step;
-                float yInc = dy / (float)step;
+                    float x = p1.X;
+                    float y = p1.Y;
 
-                float x = p1.X;
-                float y = p1.Y;
-
-                for (int i = 0; i <= step; i++)
-                {
-                    Utils.SetPixel(pBuffer, bitmap, (int)x, (int)y, color);
-
-                    // Thickness
-                    if (thickness > 1)
+                    for (int i = 0; i <= step; i++)
                     {
-                        for (int t = 1; t <= thickness - 1; t++)
+                        Utils.SetPixel(pBuffer, bitmap, (int)x, (int)y, color);
+
+                        // Thickness
+                        if (thickness > 1)
                         {
-                            if (Math.Abs(dx) > Math.Abs(dy)) // Horizontal
+                            for (int t = 1; t <= thickness - 1; t++)
                             {
-                                if ((int)y + t > height - 1 || (int)y - t < 0)
-                                    continue;
+                                if (Math.Abs(dx) > Math.Abs(dy)) // Horizontal
+                                {
+                                    if ((int)y + t > height - 1 || (int)y - t < 0)
+                                        continue;
 
-                                Utils.SetPixel(pBuffer, bitmap, (int)x, (int)y + t, color);
-                                Utils.SetPixel(pBuffer, bitmap, (int)x, (int)y - t, color);
-                            }
-                            else // Vertical
-                            {
-                                if ((int)x + t > width - 1 || (int)x - t < 0)
-                                    continue;
+                                    Utils.SetPixel(pBuffer, bitmap, (int)x, (int)y + t, color);
+                                    Utils.SetPixel(pBuffer, bitmap, (int)x, (int)y - t, color);
+                                }
+                                else // Vertical
+                                {
+                                    if ((int)x + t > width - 1 || (int)x - t < 0)
+                                        continue;
 
-                                Utils.SetPixel(pBuffer, bitmap, (int)x + t, (int)y, color);
-                                Utils.SetPixel(pBuffer, bitmap, (int)x - t, (int)y, color);
+                                    Utils.SetPixel(pBuffer, bitmap, (int)x + t, (int)y, color);
+                                    Utils.SetPixel(pBuffer, bitmap, (int)x - t, (int)y, color);
+                                }
                             }
+                        }
+
+                        x += xInc;
+                        y += yInc;
+                    }
+                }
+                else // Gupta-Sproull Algorithm
+                {
+                    //initial values in Bresenham;s algorithm
+                    int dx = p2.X - p1.X, dy = p2.Y - p1.Y;
+                    int dE = 2 * dy, dNE = 2 * (dy - dx);
+                    int d = 2 * dy - dx;
+                    int two_v_dx = 0; //numerator, v=0 for the first pixel
+                    float invDenom = 1 / (2 * (float)Math.Sqrt(dx * dx + dy * dy)); //inverted denominator
+                    float two_dx_invDenom = 2 * dx * invDenom; //precomputed constant
+                    int x = p1.X, y = p1.Y;
+                    int i;
+                    IntensifyPixel(x, y, thickness, 0);
+                    for (i = 1; IntensifyPixel(x, y + i, thickness, i * two_dx_invDenom) == 1; ++i) ;
+                    for (i = 1; IntensifyPixel(x, y - i, thickness, i * two_dx_invDenom) == 1; ++i) ;
+
+                    while (x < p2.X)
+                    {
+                        ++x;
+                        if (d < 0) // move to E
+                        {
+                            two_v_dx = d + dx;
+                            d += dE;
+                        }
+                        else // move to NE
+                        {
+                            two_v_dx = d - dx;
+                            d += dNE;
+                            ++y;
+                        }
+                        // Now set the chosen pixel and its neighbors
+                        IntensifyPixel(x, y, thickness, two_v_dx * invDenom);
+                        for (i = 1; IntensifyPixel(x, y + i, thickness, i * two_dx_invDenom - two_v_dx * invDenom) == 1; ++i) ;
+                        for (i = 1; IntensifyPixel(x, y - i, thickness, i * two_dx_invDenom + two_v_dx * invDenom) == 1; ++i) ;
+                    }
+
+                    float Coverage(int thickness, float distance, float r)
+                    {
+                        if (distance < r)
+                        {
+                            return (float)(1 / Math.PI * Math.Acos(distance / r) - distance / (Math.PI * Math.Pow(r, 2)) * Math.Sqrt(Math.Pow(r, 2) + Math.Pow(distance, 2)));
+                        }
+                        else
+                        {
+                            return 0;
                         }
                     }
 
-                    x += xInc;
-                    y += yInc;
+                    float IntensifyPixel(int xc, int yc, int thickness, float distance)
+                    {
+                        float r = 0.5f;
+                        float coverage = Coverage(thickness, distance, r);
+                        if (coverage > 0)
+                            Utils.SetPixel(pBuffer, bitmap, xc, yc, Color.Lerp(new Color(255, 255, 255, 255), color, coverage));
+                        return coverage;
+                    }
                 }
             }
-            else // Gupta-Sproull Algorithm
-            {
-                //initial values in Bresenham;s algorithm
-                int dx = p2.X - p1.X, dy = p2.Y - p1.Y;
-                int dE = 2 * dy, dNE = 2 * (dy - dx);
-                int d = 2 * dy - dx;
-                int two_v_dx = 0; //numerator, v=0 for the first pixel
-                float invDenom = 1 / (2 * (float)Math.Sqrt(dx * dx + dy * dy)); //inverted denominator
-                float two_dx_invDenom = 2 * dx * invDenom; //precomputed constant
-                int x = p1.X, y = p1.Y;
-                int i;
-                IntensifyPixel(x, y, thickness, 0);
-                for (i = 1; IntensifyPixel(x, y + i, thickness, i * two_dx_invDenom) == 1; ++i) ;
-                for (i = 1; IntensifyPixel(x, y - i, thickness, i * two_dx_invDenom) == 1; ++i) ;
-
-                while (x < p2.X)
-                {
-                    ++x;
-                    if (d < 0) // move to E
-                    {
-                        two_v_dx = d + dx;
-                        d += dE;
-                    }
-                    else // move to NE
-                    {
-                        two_v_dx = d - dx;
-                        d += dNE;
-                        ++y;
-                    }
-                    // Now set the chosen pixel and its neighbors
-                    IntensifyPixel(x, y, thickness, two_v_dx * invDenom);
-                    for (i = 1; IntensifyPixel(x, y + i, thickness, i * two_dx_invDenom - two_v_dx * invDenom) == 1; ++i) ;
-                    for (i = 1; IntensifyPixel(x, y - i, thickness, i * two_dx_invDenom + two_v_dx * invDenom) == 1; ++i) ;
-                }
-
-                float Coverage(int thickness, float distance, float r)
-                {
-                    if (distance < r)
-                    {
-                        return (float)(1 / Math.PI * Math.Acos(distance / r) - distance / (Math.PI * Math.Pow(r, 2)) * Math.Sqrt(Math.Pow(r, 2) + Math.Pow(distance, 2)));
-                    }
-                    else
-                    {
-                        return 0;
-                    }
-                }
-
-                float IntensifyPixel(int xc, int yc, int thickness, float distance)
-                {
-                    float r = 0.5f;
-                    float coverage = Coverage(thickness, distance, r);
-                    if (coverage > 0)
-                        Utils.SetPixel(pBuffer, bitmap, xc, yc, Color.Lerp(new Color(255, 255, 255, 255), color, coverage));
-                    return coverage;
-                }
-            }
-
 
             bitmap.Unlock();
 

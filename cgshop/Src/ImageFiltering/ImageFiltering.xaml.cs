@@ -93,7 +93,6 @@ namespace cgshop
 
             unsafe
             {
-
                 functionFilterEntries.Add(new FilterEntry(FilterEntryType.Graph, "Inversion", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateGraph), new Graph(FilterSettings.inversionFunctionPoints.ConvertAll(p => new GraphPoint((int)p.Value.X, (int)p.Value.Y)))))));
                 functionFilterEntries.Add(new FilterEntry(FilterEntryType.Graph, "Brightness Correction", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateGraph), new Graph(FilterSettings.brightnessCorrectionFunctionPoints.ConvertAll(p => new GraphPoint((int)p.Value.X, (int)p.Value.Y)))))));
                 functionFilterEntries.Add(new FilterEntry(FilterEntryType.Graph, "Contrast Enhancement", new FunctionFilter(new FunctionFormula(new FilterSettings.FunctionFormula_Formula(FilterSettings.CalculateGraph), new Graph(FilterSettings.contrastEnhancementFunctionPoints.ConvertAll(p => new GraphPoint((int)p.Value.X, (int)p.Value.Y)))))));
@@ -161,8 +160,7 @@ namespace cgshop
                 originalImage = new BitmapImage(new Uri(openFileDialog.FileName));
                 currentImage = originalImage;
                 Viewer.Source = currentImage;
-            }
-            //resetFuncFil();      
+            }   
         }
 
         private void ButtonRevert_Click(object sender, RoutedEventArgs e)
@@ -180,7 +178,6 @@ namespace cgshop
             saveFileDialog.DefaultExt = "png";
             saveFileDialog.FilterIndex = 2;
             saveFileDialog.RestoreDirectory = true;
-
 
             var status = saveFileDialog.ShowDialog();
             if (status != null && status == true)
@@ -216,9 +213,6 @@ namespace cgshop
         {
             DeselectActiveDraggingPoint();
         }
-
-
-
 
         private void FilterName_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {

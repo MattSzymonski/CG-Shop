@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,20 +18,31 @@ using cgshop.point;
 namespace cgshop
 {
 
-    public interface Shape
+    public abstract class Shape
     {
-        unsafe BitmapImage Draw(BitmapImage canvas);
+        public string name { get; set; }
+        public abstract unsafe BitmapImage Draw(BitmapImage canvas);
+        public abstract List<Point> GetPoints();
+
+        public Shape(string name)
+        {
+            this.name = name;
+        }
     }
 
     public class Drawer
     {
         public BitmapImage clearCanvas;
-        public BitmapImage canvas;
+        public BitmapImage canvas; // Reference to canvas
 
-        public List<Shape> shapes = new List<Shape>();
+        public ObservableCollection<Shape> shapes = new ObservableCollection<Shape>();
+        public Shape selectedShape;
+
+
 
         public Drawer(BitmapImage canvas)
         {
+            //this.clearCanvas = canvas.Clone();
             this.canvas = this.clearCanvas = canvas;
         }
 
@@ -38,17 +52,19 @@ namespace cgshop
             return RedrawCanvas();
         }
 
-        public BitmapImage ToggleLineAntialiasing(bool value)
-        {
-            foreach (var shape in shapes)
-            {
-                if (shape is Line)
-                {
-                    (shape as Line).ToggleAntialiasing(value);
-                }
-            }
-            return RedrawCanvas();
-        }
+        //public BitmapImage ToggleLineAntialiasing(bool value)
+        //{
+        //    foreach (var shape in shapes)
+        //    {
+        //        if (shape is Line)
+        //        {
+        //            (shape as Line).ToggleAntialiasing(value);
+        //        }
+        //    }
+        //    return RedrawCanvas();
+        //}
+
+
 
         public BitmapImage RedrawCanvas()
         {
@@ -58,6 +74,12 @@ namespace cgshop
                 canvas = shape.Draw(canvas);
             }
             return canvas;
+        }
+
+        public BitmapImage Clear()
+        {
+            shapes.Clear();
+            return RedrawCanvas();
         }
     }
 }

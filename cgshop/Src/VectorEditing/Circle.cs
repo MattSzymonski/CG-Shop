@@ -15,20 +15,24 @@ namespace cgshop
 {
     public class Circle : Shape
     {
-        Point midPoint;
-        Point circumferencePoint;
-        int thickness;
-        Color color;
+        List<Point> points;
+        public Color color { get; set; }
 
-        public Circle(Point midPoint, Point circumferencePoint, int thickness, Color color)
+        public Circle(String name, Point midPoint, Point circumferencePoint, Color color) : base(name)
         {
-            this.midPoint = midPoint;
-            this.circumferencePoint = circumferencePoint;
-            this.thickness = thickness;
+            points = new List<Point>();
+            points.Add(midPoint);
+            points.Add(circumferencePoint);
+
             this.color = color;
         }
 
-        public unsafe BitmapImage Draw(BitmapImage canvas)
+        public override List<Point> GetPoints()
+        {
+            return points;
+        }
+
+        public override unsafe BitmapImage Draw(BitmapImage canvas)
         {
             var bitmap = new WriteableBitmap(canvas);
 
@@ -41,8 +45,13 @@ namespace cgshop
             int stride = bitmap.BackBufferStride;
             int bytesPerPixel = (bitmap.Format.BitsPerPixel + 7) / 8;
 
+
             { // Midpoint Circle Algorithm
-                int r = (int)Math.Sqrt(Math.Pow((midPoint.X - circumferencePoint.X), 2) + Math.Pow((midPoint.Y - circumferencePoint.Y), 2));
+
+                Point midPoint = points[0];
+                Point circumferencePoint = points[1];
+
+                int r = (int)Math.Sqrt(Math.Pow((points[0].X - circumferencePoint.X), 2) + Math.Pow((midPoint.Y - circumferencePoint.Y), 2));
 
                 int d = 1 - r; // decider
                 int y = 0;

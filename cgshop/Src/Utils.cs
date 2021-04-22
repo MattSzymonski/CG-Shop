@@ -13,7 +13,7 @@ namespace cgshop
         }
 
 
-        byte b, g, r, a;
+        //byte b, g, r, a;
 
         public Color(byte b, byte g, byte r, byte a)
         {
@@ -21,6 +21,14 @@ namespace cgshop
             channels[1] = g;
             channels[2] = r;
             channels[3] = a;
+        }
+
+        public Color(System.Windows.Media.Color color)
+        {
+            channels[0] = color.B;
+            channels[1] = color.G;
+            channels[2] = color.R;
+            channels[3] = color.A;
         }
 
         public byte GetChannel(int channel)
