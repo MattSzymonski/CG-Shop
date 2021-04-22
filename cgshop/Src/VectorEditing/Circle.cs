@@ -16,7 +16,13 @@ namespace cgshop
     public class Circle : Shape
     {
         List<Point> points;
-        public Color color { get; set; }
+
+        private Color color;
+        public Color Color
+        {
+            get { return color; }
+            set { color = value; }
+        }
 
         public Circle(String name, Point midPoint, Point circumferencePoint, Color color) : base(name)
         {

@@ -84,6 +84,7 @@
     <Compile Include="Src\VectorEditing\Circle.cs" />
     <Compile Include="Src\VectorEditing\Drawer.cs" />
     <Compile Include="Src\VectorEditing\Line.cs" />
+    <Compile Include="Src\VectorEditing\Poly.cs" />
     <Compile Include="Src\VectorEditing\VectorEditing.xaml.cs">
       <DependentUpon>VectorEditing.xaml</DependentUpon>
     </Compile>

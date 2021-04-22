@@ -16,9 +16,27 @@ namespace cgshop
     public class Line : Shape
     {
         List<Point> points;
-        public int thickness { get; set; }
-        public Color color { get; set; }
-        public bool antialiased { get; set; }
+        
+        private int thickness;
+        public int Thickness
+        {
+            get { return thickness; }
+            set { thickness = value; }
+        }
+
+        private Color color;
+        public Color Color
+        {
+            get { return color; }
+            set { color = value; }
+        }
+
+        private bool antialiased;
+        public bool Antialiased
+        {
+            get { return antialiased; }
+            set { antialiased = value;  }
+        }
 
         public Line(String name, Point p1, Point p2, int thickness, Color color) : base(name)
         {

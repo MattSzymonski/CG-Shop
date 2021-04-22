@@ -26,7 +26,8 @@ namespace cgshop
     public enum ShapeType
     {
         Line,
-        Circle
+        Circle,
+        Poly
     }
 
     public partial class VectorEditing : Page, INotifyPropertyChanged
@@ -34,17 +35,10 @@ namespace cgshop
         private int DRAGGING_POINT_SIZE = 8;
         private int MINIMAL_DRAGGING_POINT_MARGIN = 8;
 
-
-        //private BitmapImage currentCanvas;
-        // private WriteableBitmap currentCanvas2;
         private Drawer drawer;
 
-        // private List<MouseButtonEventArgs> prevMouseButtonEventArgs;
-
-        // private MouseButtonEventArgs prevMouseButtonEventArgs;
-
-
         private Point previousClickPoint;
+
 
         private ShapeType selectedShapeType;
         private Shape selectedShape;
@@ -139,12 +133,15 @@ namespace cgshop
                     switch (selectedShapeType)
                     {
                         case ShapeType.Line:
-                            //newShape = new cgshop.Line(selectedShapeType.ToString(), p1, p2, 3, new Color(0, 0, 0, 255));
-                            newShape = new cgshop.Line("rer", p1, p2, 3, new Color(0, 0, 0, 255));
+                            newShape = new cgshop.Line(selectedShapeType.ToString(), p1, p2, 3, new Color(0, 0, 0, 255));
                             break;
 
                         case ShapeType.Circle:
-                            newShape = new cgshop.Circle(selectedShapeType.ToString(), p1, p2, new Color(0, 0, 0, 255));
+                            newShape = new Circle(selectedShapeType.ToString(), p1, p2, new Color(0, 0, 0, 255));
+                            break;
+
+                        case ShapeType.Poly:
+                            newShape = new Poly(selectedShapeType.ToString(), p1, p2, new Color(0, 0, 0, 255));
                             break;
 
                         default:
@@ -180,15 +177,6 @@ namespace cgshop
             
         }
 
-        private void Button_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            
-            //Console.WriteLine(ShapeList.SelectedIndex);
-           // CanvasImage.Source = drawer.RedrawCanvas();
-
-        }
-
-      
 
         private void ShapeList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -248,10 +236,10 @@ namespace cgshop
                 ShapeAntialiasingSettingTab.Visibility = System.Windows.Visibility.Visible;
 
                 // Sync shape settings
-                ShapeThicknessSetting.Value = (selectedShape as Line).thickness;
-                Color c = (selectedShape as Line).color;
+                ShapeThicknessSetting.Value = (selectedShape as Line).Thickness;
+                Color c = (selectedShape as Line).Color;
                 ShapeColorSetting.SelectedColor = System.Windows.Media.Color.FromArgb(c[3], c[2], c[1], c[0]);
-                ShapeAntialiasingSetting.IsChecked = (selectedShape as Line).antialiased;
+                ShapeAntialiasingSetting.IsChecked = (selectedShape as Line).Antialiased;
 
             }
             else if (selectedShape.GetType() == typeof(Circle))
@@ -261,18 +249,18 @@ namespace cgshop
                 ShapeAntialiasingSettingTab.Visibility = System.Windows.Visibility.Hidden;
 
                 // Sync shape settings
-                Color c = (selectedShape as Circle).color;
+                Color c = (selectedShape as Circle).Color;
                 ShapeColorSetting.SelectedColor = System.Windows.Media.Color.FromArgb(c[3], c[2], c[1], c[0]);
             }
-            //else if (shape.GetType() == typeof(Poly))
-            //{
-            //    ShapeColorSettingTab.Visibility = System.Windows.Visibility.Visible;
-            //    ShapeThicknessSettingTab.Visibility = System.Windows.Visibility.Visible;
-            //    ShapeAASettingTab.Visibility = System.Windows.Visibility.Visible;
-            //}
-            
+            else if (selectedShape.GetType() == typeof(Poly))
+            {
+                ShapeColorSettingTab.Visibility = System.Windows.Visibility.Visible;
+                ShapeThicknessSettingTab.Visibility = System.Windows.Visibility.Visible;
+                ShapeAntialiasingSettingTab.Visibility = System.Windows.Visibility.Visible;
+            }
 
-      
+
+
 
             // Add new dragging points
             for (int p = 0; p < selectedShape.GetPoints().Count; p++)
@@ -445,11 +433,11 @@ namespace cgshop
             {
                 if (selectedShape.GetType() == typeof(Line))
                 {
-                    (selectedShape as Line).thickness = (int)ShapeThicknessSetting.Value;
+                    (selectedShape as Line).Thickness = (int)ShapeThicknessSetting.Value;
                 }
                 else if (selectedShape.GetType() == typeof(Poly))
                 {
-                    (selectedShape as Poly).thickness = (int)ShapeThicknessSetting.Value;
+                    (selectedShape as Poly).Thickness = (int)ShapeThicknessSetting.Value;
                 }
 
                 CanvasImage.Source = drawer.RedrawCanvas();
@@ -463,16 +451,16 @@ namespace cgshop
 
                 if (selectedShape.GetType() == typeof(Line))
                 {
-                    (selectedShape as Line).color = new Color(ShapeColorSetting.SelectedColor.Value);
+                    (selectedShape as Line).Color = new Color(ShapeColorSetting.SelectedColor.Value);
                 }
                 else if (selectedShape.GetType() == typeof(Circle))
                 {
-                    (selectedShape as Circle).color = new Color(ShapeColorSetting.SelectedColor.Value);
-                } 
-                //else if (selectedShape.GetType() == typeof(Poly))
-                //{
-                //    (selectedShape as Poly).color = new Poly(ShapeColorSetting.SelectedColor.Value);
-                //}
+                    (selectedShape as Circle).Color = new Color(ShapeColorSetting.SelectedColor.Value);
+                }
+                else if (selectedShape.GetType() == typeof(Poly))
+                {
+                    (selectedShape as Poly).Color = new Color(ShapeColorSetting.SelectedColor.Value);
+                }
 
                 CanvasImage.Source = drawer.RedrawCanvas();
             }           
@@ -482,12 +470,12 @@ namespace cgshop
         {
             if (selectedShape.GetType() == typeof(Line))
             {
-                (selectedShape as Line).antialiased = ShapeAntialiasingSetting.IsChecked.Value;
+                (selectedShape as Line).Antialiased = ShapeAntialiasingSetting.IsChecked.Value;
             }
-            //else if (selectedShape.GetType() == typeof(Poly))
-            //{
-            //    (selectedShape as Poly).antialiased = ShapeAntialiasingSetting.IsChecked.Value;
-            //}
+            else if (selectedShape.GetType() == typeof(Poly))
+            {
+                (selectedShape as Poly).Antialiased = ShapeAntialiasingSetting.IsChecked.Value;
+            }
 
             CanvasImage.Source = drawer.RedrawCanvas();
         }
