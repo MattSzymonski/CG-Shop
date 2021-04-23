@@ -13,6 +13,9 @@ using cgshop.point;
 
 namespace cgshop
 {
+
+    [System.Xml.Serialization.XmlInclude(typeof(Color))]
+    [System.Xml.Serialization.XmlRoot("Shape")]
     public class Line : Shape
     {
         List<Point> points;
@@ -24,6 +27,7 @@ namespace cgshop
             set { thickness = value; }
         }
 
+        
         private Color color;
         public Color Color
         {
@@ -36,6 +40,11 @@ namespace cgshop
         {
             get { return antialiased; }
             set { antialiased = value;  }
+        }
+
+        public Line() : base("")
+        {
+
         }
 
         public Line(String name, Point p1, Point p2, int thickness, Color color) : base(name)
@@ -120,14 +129,18 @@ namespace cgshop
                     int dx = p2.X - p1.X, dy = p2.Y - p1.Y;
                     int dE = 2 * dy, dNE = 2 * (dy - dx);
                     int d = 2 * dy - dx;
+
                     int two_v_dx = 0; //numerator, v=0 for the first pixel
                     float invDenom = 1 / (2 * (float)Math.Sqrt(dx * dx + dy * dy)); //inverted denominator
                     float two_dx_invDenom = 2 * dx * invDenom; //precomputed constant
+                    
                     int x = p1.X, y = p1.Y;
                     int i;
                     IntensifyPixel(x, y, thickness, 0);
-                    for (i = 1; IntensifyPixel(x, y + i, thickness, i * two_dx_invDenom) == 1; ++i) ;
-                    for (i = 1; IntensifyPixel(x, y - i, thickness, i * two_dx_invDenom) == 1; ++i) ;
+                    for (i = 1; IntensifyPixel(x, y + i, thickness, i * two_dx_invDenom) == 1; ++i);
+                    for (i = 1; IntensifyPixel(x, y - i, thickness, i * two_dx_invDenom) == 1; ++i);
+
+                    //...
 
                     while (x < p2.X)
                     {
@@ -143,17 +156,18 @@ namespace cgshop
                             d += dNE;
                             ++y;
                         }
+
                         // Now set the chosen pixel and its neighbors
                         IntensifyPixel(x, y, thickness, two_v_dx * invDenom);
                         for (i = 1; IntensifyPixel(x, y + i, thickness, i * two_dx_invDenom - two_v_dx * invDenom) == 1; ++i) ;
                         for (i = 1; IntensifyPixel(x, y - i, thickness, i * two_dx_invDenom + two_v_dx * invDenom) == 1; ++i) ;
                     }
 
-                    float Coverage(int thickness, float distance, float r)
+                    float Cov(float distance, float r)
                     {
-                        if (distance < r)
+                        if (distance <= r)
                         {
-                            return (float)(1 / Math.PI * Math.Acos(distance / r) - distance / (Math.PI * Math.Pow(r, 2)) * Math.Sqrt(Math.Pow(r, 2) + Math.Pow(distance, 2)));
+                            return (float)((1 / Math.PI) * Math.Acos(distance / r) - ((distance / (Math.PI * Math.Pow(r, 2))) * Math.Sqrt(Math.Pow(r, 2) - Math.Pow(distance, 2))));
                         }
                         else
                         {
@@ -161,13 +175,52 @@ namespace cgshop
                         }
                     }
 
+                    float Coverage(int thickness, float distance, float r)
+                    {
+                        float w = (float)thickness / 2;
+
+                        Console.WriteLine(w + " " + r + " " + distance);
+
+                        distance = Math.Abs(distance);
+
+                        if (w >= r)
+                        {
+                            if (w <= distance)
+                            {
+                                return Cov(distance - w, r);
+                            }
+                            if (0 <= distance && distance <= w)
+                            {
+                                return 1 - Cov(w - distance, r);
+                            }
+                        }
+                        if (w <= r)
+                        {
+                            if (0 <= distance && distance <= w)
+                            {
+                                return (1 - Cov(w - distance, r) - Cov(w + distance, r));
+                            }
+                            if (w <= distance && distance <= r - w)
+                            {
+                                return (Cov(distance - w, r) - Cov(distance + w, r));
+                            }
+                            if (r - w <= distance && distance <= r + w)
+                            {
+                                return (Cov(distance - w, r));
+                            }
+                        }
+                        return 0;
+                        throw new NotSupportedException();
+                    }
+
+
                     float IntensifyPixel(int xc, int yc, int thickness, float distance)
                     {
                         float r = 0.5f;
-                        float coverage = Coverage(thickness, distance, r);
-                        if (coverage > 0)
-                            Utils.SetPixel(pBuffer, bitmap, xc, yc, Color.Lerp(new Color(255, 255, 255, 255), color, coverage));
-                        return coverage;
+                        float cov = Coverage(thickness, distance, r);
+                        if (cov > 0)
+                            Utils.SetPixel(pBuffer, bitmap, xc, yc, Color.Lerp(new Color(255, 255, 255, 255), color, cov));
+                        return cov;
                     }
                 }
             }

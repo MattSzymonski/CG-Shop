@@ -3,6 +3,7 @@ using System.Windows.Media.Imaging;
 
 namespace cgshop
 {
+    [System.Xml.Serialization.XmlRoot("Color")]
     public class Color
     {
         private byte[] channels = new byte[4];
@@ -12,6 +13,10 @@ namespace cgshop
             set { channels[index] = value; }
         }
 
+        public Color()
+        {
+
+        }
 
         //byte b, g, r, a;
 

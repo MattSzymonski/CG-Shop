@@ -17,7 +17,7 @@ using cgshop.point;
 
 namespace cgshop
 {
-
+    [System.Serializable]
     public abstract class Shape
     {
         public string name { get; set; }

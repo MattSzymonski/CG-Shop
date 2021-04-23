@@ -18,7 +18,7 @@ using System.IO;
 using cgshop.point;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-
+using System.Xml.Serialization;
 
 namespace cgshop
 {
@@ -567,10 +567,8 @@ namespace cgshop
 
         private void ButtonSave_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-          
-        }
 
-       
+        }
     }
 
 }
