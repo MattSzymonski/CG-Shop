@@ -54,8 +54,6 @@ namespace cgshop
 
         public override unsafe BitmapImage Draw(BitmapImage canvas)
         {
-            Console.WriteLine("redrawing for points " + points[0].X);
-
             var bitmap = new WriteableBitmap(canvas);
 
             bitmap.Lock();

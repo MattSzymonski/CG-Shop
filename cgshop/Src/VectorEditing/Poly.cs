@@ -15,7 +15,7 @@ namespace cgshop
 {
     public class Poly : Shape
     {
-        List<Point> points;
+        public List<Point> points;
         List<Line> lines;
 
         private int thickness;
@@ -39,13 +39,17 @@ namespace cgshop
 
         public Poly(String name, List<Point> points, int thickness, Color color) : base(name)
         {
+            //this.points = points;
             lines = new List<Line>();
+
             for (int i = 0; i < points.Count; i++)
             {
                 lines.Add(new Line("Line_" + i, points[i], points[(i + 1) % points.Count], thickness, color));
             }
 
             this.points = points;
+            // this.points = new List<Point>();
+            //this.points = points;
             this.thickness = thickness;
             this.color = color;
         }

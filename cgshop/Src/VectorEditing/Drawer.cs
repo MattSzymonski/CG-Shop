@@ -24,6 +24,7 @@ namespace cgshop
         public abstract unsafe BitmapImage Draw(BitmapImage canvas);
         public abstract List<Point> GetPoints();
 
+
         public Shape(string name)
         {
             this.name = name;
@@ -39,10 +40,8 @@ namespace cgshop
         public Shape selectedShape;
 
 
-
         public Drawer(BitmapImage canvas)
         {
-            //this.clearCanvas = canvas.Clone();
             this.canvas = this.clearCanvas = canvas;
         }
 
@@ -51,20 +50,6 @@ namespace cgshop
             shapes.Add(shape);
             return RedrawCanvas();
         }
-
-        //public BitmapImage ToggleLineAntialiasing(bool value)
-        //{
-        //    foreach (var shape in shapes)
-        //    {
-        //        if (shape is Line)
-        //        {
-        //            (shape as Line).ToggleAntialiasing(value);
-        //        }
-        //    }
-        //    return RedrawCanvas();
-        //}
-
-
 
         public BitmapImage RedrawCanvas()
         {

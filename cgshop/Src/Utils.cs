@@ -75,6 +75,11 @@ namespace cgshop
                 this.Y = (int)y;
             }
 
+            public double Distance(Point other)
+            {
+                return Math.Sqrt(Math.Pow((this.X - other.X), 2) + Math.Pow((this.Y - other.Y), 2));
+            }
+
             public override string ToString()
             {
                 return "Point: " + X + ", " + Y;

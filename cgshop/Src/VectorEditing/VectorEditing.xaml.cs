@@ -32,12 +32,14 @@ namespace cgshop
 
     public partial class VectorEditing : Page, INotifyPropertyChanged
     {
+        private int FINISH_POLY_THRESHOLD = 15;
         private int DRAGGING_POINT_SIZE = 8;
-        private int MINIMAL_DRAGGING_POINT_MARGIN = 8;
+        private int PROJECTION_POINT_SIZE = 5;
+       // private int MINIMAL_DRAGGING_POINT_MARGIN = 8;
 
         private Drawer drawer;
 
-        private Point previousClickPoint;
+        private List<Point> previousClickPoints;
 
 
         private ShapeType selectedShapeType;
@@ -48,7 +50,8 @@ namespace cgshop
 
         private bool drawing;
         public bool Drawing { get { return drawing; } set { drawing = value; OnPropertyChanged(); } }
-        private List<Ellipse> activeDraggingPoints;
+        private List<Ellipse> activeDraggingPoints; // For altering the shapes
+        private List<Ellipse> activeProjectionPoints; // For seeing points when drawing new shape
         private Ellipse activeDraggingPoint;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -73,6 +76,8 @@ namespace cgshop
         private void SetupModule()
         {
             activeDraggingPoints = new List<Ellipse>();
+            activeProjectionPoints = new List<Ellipse>();
+            previousClickPoints = new List<Point>();
 
             var canvas = new BitmapImage(new Uri("/Res/Test.png", UriKind.Relative));
 
@@ -115,47 +120,81 @@ namespace cgshop
             drawer.AddShape(l2);
             ShapeList.ItemsSource = drawer.shapes;
             CanvasImage.Source = drawer.RedrawCanvas();
-
-
-
         }
 
         private void CanvasImage_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (Drawing)
             {
-                if (previousClickPoint != null)
+                Point clickPoint = new Point(e.GetPosition(sender as System.Windows.IInputElement));
+                switch (selectedShapeType)
                 {
-                    Point p1 = previousClickPoint;
-                    Point p2 = new Point(e.GetPosition(sender as System.Windows.IInputElement));
 
-                    Shape newShape;
-                    switch (selectedShapeType)
-                    {
-                        case ShapeType.Line:
-                            newShape = new cgshop.Line(selectedShapeType.ToString(), p1, p2, 3, new Color(0, 0, 0, 255));
-                            break;
+                    case (ShapeType.Line):
+                    case (ShapeType.Circle):
 
-                        case ShapeType.Circle:
-                            newShape = new Circle(selectedShapeType.ToString(), p1, p2, new Color(0, 0, 0, 255));
-                            break;
+                        //if (previousClickPoints[0] != null)
+                        if (previousClickPoints.Count >= 1)
+                        {
+                            Point p1 = previousClickPoints[0];
+                            Point p2 = clickPoint;
 
-                        case ShapeType.Poly:
-                            newShape = new Poly(selectedShapeType.ToString(), p1, p2, new Color(0, 0, 0, 255));
-                            break;
+                            Shape newShape;
+                            switch (selectedShapeType)
+                            {
+                                case ShapeType.Line:
+                                    newShape = new Line(selectedShapeType.ToString(), p1, p2, 1, new Color(0, 0, 0, 255));
+                                    break;
 
-                        default:
-                            throw new NotImplementedException();
-                    }
+                                case ShapeType.Circle:
+                                    newShape = new Circle(selectedShapeType.ToString(), p1, p2, new Color(0, 0, 0, 255));
+                                    break;
 
-                    CanvasImage.Source = drawer.AddShape(newShape);
-                    ShapeList.SelectedIndex = ShapeList.Items.Count - 1;
-                   
-                    StopDrawing();
-                }
-                else
-                {
-                    previousClickPoint = new Point(e.GetPosition(sender as System.Windows.IInputElement));
+                                default:
+                                    throw new NotImplementedException();
+                            }
+
+                            CanvasImage.Source = drawer.AddShape(newShape);
+                            ShapeList.SelectedIndex = ShapeList.Items.Count - 1;
+
+                            StopDrawing();
+                        }
+                        else
+                        {
+                            previousClickPoints.Add(clickPoint);
+                            activeProjectionPoints.Add(CreateProjectionPoint(clickPoint));
+                        }
+                        break;
+
+                    case (ShapeType.Poly):
+
+                        //if (previousClickPoints[0] != null && previousClickPoints[1] != null)
+                       
+                        if (previousClickPoints.Count >= 2)
+                        {
+                            if (clickPoint.Distance(previousClickPoints[0]) < (double)FINISH_POLY_THRESHOLD) { // If is new point is near the first placed point then create polygon
+                                Shape newShape = new Poly(selectedShapeType.ToString(), new List<Point>(previousClickPoints), 1, new Color(0, 0, 0, 255));
+                                CanvasImage.Source = drawer.AddShape(newShape);
+
+                                ShapeList.SelectedIndex = ShapeList.Items.Count - 1;
+                                StopDrawing();
+                            }
+                            else
+                            {
+                                previousClickPoints.Add(clickPoint);
+                                activeProjectionPoints.Add(CreateProjectionPoint(clickPoint));
+                            }
+                        }
+                        else
+                        {
+                            previousClickPoints.Add(clickPoint);
+                            activeProjectionPoints.Add(CreateProjectionPoint(clickPoint));
+                        }
+
+                    break;
+
+                    default:
+                        throw new NotImplementedException();       
                 }
             }
             else
@@ -165,6 +204,8 @@ namespace cgshop
            
         }
 
+     
+
         private void DeselectShape()
         {
             ShapeList.SelectedIndex = -1;
@@ -173,10 +214,8 @@ namespace cgshop
             {
                 CanvasUI.Children.Remove(activeDraggingPoints[p]);
                 activeDraggingPoints.Remove(activeDraggingPoints[p]);
-            }
-            
+            }    
         }
-
 
         private void ShapeList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -184,7 +223,6 @@ namespace cgshop
             {          
                 StopDrawing();
                 SelectShape();
-
             }
             else
             {
@@ -200,7 +238,7 @@ namespace cgshop
                 {
                     drag = false;
                     draggingStartPoint = null;
-                    previousClickPoint = null;
+                    previousClickPoints.Clear();
                     selectedShape = null;
                     drawer.shapes.RemoveAt(ShapeList.SelectedIndex);
                     CanvasImage.Source = drawer.RedrawCanvas();
@@ -257,14 +295,18 @@ namespace cgshop
                 ShapeColorSettingTab.Visibility = System.Windows.Visibility.Visible;
                 ShapeThicknessSettingTab.Visibility = System.Windows.Visibility.Visible;
                 ShapeAntialiasingSettingTab.Visibility = System.Windows.Visibility.Visible;
+
+                // Sync shape settings
+                ShapeThicknessSetting.Value = (selectedShape as Poly).Thickness;
+                Color c = (selectedShape as Poly).Color;
+                ShapeColorSetting.SelectedColor = System.Windows.Media.Color.FromArgb(c[3], c[2], c[1], c[0]);
+                ShapeAntialiasingSetting.IsChecked = (selectedShape as Poly).Antialiased;
             }
-
-
 
 
             // Add new dragging points
             for (int p = 0; p < selectedShape.GetPoints().Count; p++)
-            {
+            { 
                 CreateDraggingPoint(p);
             }
 
@@ -354,7 +396,9 @@ namespace cgshop
                 Canvas.SetTop(draggedItem, position.Y);
 
                 // Set new value to point
-                selectedShape.GetPoints()[draggedItemIndex] = CalculatePointValueFromCanvasPosition(new Point(Canvas.GetLeft(draggedItem), Canvas.GetTop(draggedItem)));
+                Point newPoint = CalculatePointValueFromCanvasPosition(new Point(Canvas.GetLeft(draggedItem), Canvas.GetTop(draggedItem))); ;
+                selectedShape.GetPoints()[draggedItemIndex].X = newPoint.X;
+                selectedShape.GetPoints()[draggedItemIndex].Y = newPoint.Y;
 
                 CanvasImage.Source = drawer.RedrawCanvas();
             }
@@ -389,13 +433,34 @@ namespace cgshop
             }
         }
 
-      
+        private Ellipse CreateProjectionPoint(Point point)
+        {
+            Ellipse projectionPoint = new Ellipse() { };
+            projectionPoint.Width = PROJECTION_POINT_SIZE;
+            projectionPoint.Height = PROJECTION_POINT_SIZE;
+            projectionPoint.Fill = new SolidColorBrush(Colors.Gray);
+
+            Point canvasPoint = CalculateCanvasPositionFromPointValue(point);
+            Canvas.SetLeft(projectionPoint, canvasPoint.X);
+            Canvas.SetTop(projectionPoint, canvasPoint.Y);
+            Panel.SetZIndex(projectionPoint, 6); // Higher means top
+
+            CanvasUI.Children.Add(projectionPoint); // Draw points on canvas
+
+            return projectionPoint;
+        }
 
         private void StopDrawing()
         {
+            foreach (var projectionPoint in activeProjectionPoints)
+            {
+                CanvasUI.Children.Remove(projectionPoint);
+            }
+            activeProjectionPoints.Clear();
+
             Mouse.OverrideCursor = null;
             Drawing = false;
-            previousClickPoint = null;
+            previousClickPoints.Clear(); 
         }
 
         private void Canvas_MouseEnter(object sender, MouseEventArgs e)

@@ -80,7 +80,6 @@
     <Compile Include="Src\ImageFiltering\OctreeColorQuantizer.cs" />
     <Compile Include="Src\ImageFiltering\RGBToYCbCr.cs" />
     <Compile Include="Src\Utils.cs" />
-    <Compile Include="Src\VectorEditing\Antialiasing.cs" />
     <Compile Include="Src\VectorEditing\Circle.cs" />
     <Compile Include="Src\VectorEditing\Drawer.cs" />
     <Compile Include="Src\VectorEditing\Line.cs" />
