@@ -27,7 +27,8 @@ namespace cgshop
     {
         Line,
         Circle,
-        Poly
+        Poly,
+        Capsule,
     }
 
     public partial class VectorEditing : Page, INotifyPropertyChanged
@@ -81,43 +82,13 @@ namespace cgshop
 
             var canvas = new BitmapImage(new Uri("/Res/Test.png", UriKind.Relative));
 
-            /*
-            int width = (int)128;
-            int height = (int)128;
-
-            int bytesPerPixel = PixelFormats.Bgra32.BitsPerPixel; // 32
-            int stride = width * bytesPerPixel / 8; // Width * 4;
-            byte[] pixels = new byte[height * stride];
-            //BitmapPalette bitmapPalette = new BitmapPalette(new List<System.Windows.Media.Color>() { Colors.Green });
-            BitmapPalette bitmapPalette = new BitmapPalette(new List<System.Windows.Media.Color>() { Colors.Blue, Colors.Green, Colors.Red, Colors.Transparent });
-            BitmapSource bitmapSource = BitmapSource.Create(width, height, 96, 96, PixelFormats.Bgra32, bitmapPalette, pixels, stride);
-
-            BitmapImage bitmapImage = new BitmapImage();
-            using (MemoryStream stream = new MemoryStream())
-            {
-                PngBitmapEncoder encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
-                encoder.Save(stream);
-                bitmapImage.BeginInit();
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.StreamSource = stream;
-                bitmapImage.EndInit();
-                bitmapImage.Freeze();
-            }
-            */
 
             drawer = new Drawer(canvas);
             CanvasImage.Source = drawer.canvas;
 
             ShapeSelector.ItemsSource = Enum.GetValues(typeof(ShapeType));
-            ShapeSelector.SelectedIndex = 0;
+            ShapeSelector.SelectedIndex = 3;
             
-
-            Line l1 = new Line("line", new Point(10,10), new Point(25,25), 1, new Color(255,0,0,255));
-            Line l2 = new Line("line" ,new Point(100, 100), new Point(250, 250), 1, new Color(0, 0, 255, 255));
-            l1.name = "anui";
-            drawer.AddShape(l1);
-            drawer.AddShape(l2);
             ShapeList.ItemsSource = drawer.shapes;
             CanvasImage.Source = drawer.RedrawCanvas();
         }
@@ -133,7 +104,6 @@ namespace cgshop
                     case (ShapeType.Line):
                     case (ShapeType.Circle):
 
-                        //if (previousClickPoints[0] != null)
                         if (previousClickPoints.Count >= 1)
                         {
                             Point p1 = previousClickPoints[0];
@@ -167,9 +137,7 @@ namespace cgshop
                         break;
 
                     case (ShapeType.Poly):
-
-                        //if (previousClickPoints[0] != null && previousClickPoints[1] != null)
-                       
+                    
                         if (previousClickPoints.Count >= 2)
                         {
                             if (clickPoint.Distance(previousClickPoints[0]) < (double)FINISH_POLY_THRESHOLD) { // If is new point is near the first placed point then create polygon
@@ -191,7 +159,25 @@ namespace cgshop
                             activeProjectionPoints.Add(CreateProjectionPoint(clickPoint));
                         }
 
-                    break;
+                        break;
+
+                    case (ShapeType.Capsule):
+                        if (previousClickPoints.Count == 2)
+                        {
+                            Point p1 = previousClickPoints[0];
+                            Point p2 = previousClickPoints[1];
+                            Point p3 = clickPoint;
+                            Shape newShape = new Capsule(selectedShapeType.ToString(), p1, p2, p3, new Color(0, 0, 0, 255));
+                            CanvasImage.Source = drawer.AddShape(newShape);
+                            ShapeList.SelectedIndex = ShapeList.Items.Count - 1;
+                            StopDrawing();
+                        }
+                        else
+                        {
+                            previousClickPoints.Add(clickPoint);
+                            activeProjectionPoints.Add(CreateProjectionPoint(clickPoint));
+                        }
+                        break;
 
                     default:
                         throw new NotImplementedException();       

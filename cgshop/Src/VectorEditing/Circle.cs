@@ -38,6 +38,12 @@ namespace cgshop
             return points;
         }
 
+        // F opposite midpoint
+        public int sign(Point D, Point E, Point F)
+        {
+            return ((E.X - D.X) * (F.Y - D.Y) - (E.Y - D.Y) * (F.X - D.X));
+        }
+
         public override unsafe BitmapImage Draw(BitmapImage canvas)
         {
             var bitmap = new WriteableBitmap(canvas);
