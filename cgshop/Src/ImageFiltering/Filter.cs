@@ -197,6 +197,15 @@ namespace cgshop
         {
             var bitmap = new WriteableBitmap(original);
 
+            //Console.WriteLine(bitmap.BackBufferStride);
+            Console.WriteLine(bitmap.Format.BitsPerPixel.ToString());
+            Console.WriteLine(bitmap.BackBufferStride);
+            Console.WriteLine(bitmap.DpiX);
+
+            //32
+            //3204
+            //801
+
             bitmap.Lock();
 
             byte* pBuffer = (byte*)bitmap.BackBuffer; // Pointer to actual image data in buffer (BGRA32 format (1 byte for each channel))

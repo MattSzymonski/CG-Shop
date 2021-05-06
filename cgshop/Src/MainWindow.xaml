@@ -1,0 +1,25 @@
+﻿<Window x:Class="cgshop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:cgshop"
+        mc:Ignorable="d"
+        xmlns:wT="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
+        Title="cgshop" Height="650" Width="1150" Icon="../Res/Logo2.png">
+
+    <Grid>
+        <TabControl SelectedIndex="1">
+            <TabItem Header="Image Filtering">
+                <Frame Source="ImageFiltering/ImageFiltering.xaml" />
+            </TabItem>
+            <TabItem Header="Vector Editing">
+                <Frame Source="VectorEditing/VectorEditing.xaml" />
+            </TabItem>
+        </TabControl>
+
+    </Grid>
+    
+    
+    
+</Window>

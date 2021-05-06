@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 
 namespace cgshop
@@ -24,6 +25,37 @@ namespace cgshop
             throw new NotImplementedException();
         }
     }
+
+    public class InverseBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType,
+        object parameter, CultureInfo culture)
+        {
+            return (bool)value ? false : true;
+        }
+
+        public object ConvertBack(object value, Type targetType,
+        object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class SelectedShapeIndexToVisiblityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType,
+        object parameter, CultureInfo culture)
+        {
+            return (int)value == -1 ? Visibility.Hidden : Visibility.Visible;
+        }
+
+        public object ConvertBack(object value, Type targetType,
+        object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
 
     // Copyrights to Rachel Lim
     // https://rachel53461.wordpress.com/2011/08/20/the-math-converter/
