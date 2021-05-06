@@ -13,7 +13,7 @@ Small photoshop-like program made in WPF for learning low-level graphic algorith
 
 ### Vector Editing
 - Functional vector editor
-- Adding vector shapes to canvas (Lines [DDA] , Circles [Midpoint Circle], Polygons)
+- Adding vector shapes to canvas (Lines [DDA], Circles [Midpoint Circle], Polygons)
 - Moving vertices of vector shapes
 - Changing parameters of vector shapes (Color, Thickness, Anti-aliasing [Gupta-Sproull])
 
@@ -21,8 +21,8 @@ Small photoshop-like program made in WPF for learning low-level graphic algorith
 
 <p align="center">
   <img src="Media/cgshop_1.png" img width=100%>
-  
+  <br>
   <img src="Media/cgshop_2.png" img width=100%>
-  
+  <br>
   <img src="Media/cgshop_3.png" img width=100%>
 </p>
