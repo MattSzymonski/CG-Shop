@@ -21,8 +21,8 @@ Small photoshop-like program made in WPF for learning low-level graphic algorith
 
 <p align="center">
   <img src="Media/cgshop_1.png" img width=100%>
-  <br>
+  <br><br>
   <img src="Media/cgshop_2.png" img width=100%>
-  <br>
+  <br><br>
   <img src="Media/cgshop_3.png" img width=100%>
 </p>
