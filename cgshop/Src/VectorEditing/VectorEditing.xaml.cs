@@ -29,6 +29,7 @@ namespace cgshop
         Circle,
         Poly,
         Capsule,
+        Rectangle,
     }
 
     public partial class VectorEditing : Page, INotifyPropertyChanged
@@ -87,7 +88,7 @@ namespace cgshop
             CanvasImage.Source = drawer.canvas;
 
             ShapeSelector.ItemsSource = Enum.GetValues(typeof(ShapeType));
-            ShapeSelector.SelectedIndex = 2;
+            ShapeSelector.SelectedIndex = 4;
             
             ShapeList.ItemsSource = drawer.shapes;
             CanvasImage.Source = drawer.RedrawCanvas();
@@ -179,6 +180,24 @@ namespace cgshop
                         }
                         break;
 
+                    case (ShapeType.Rectangle):
+                        if (previousClickPoints.Count == 1)
+                        {
+                            Point p1 = previousClickPoints[0];
+                            Point p2 = clickPoint;
+                            Shape newShape = new Rectangle(selectedShapeType.ToString(), p1, p2, new Color(0, 0, 0, 255));
+                            CanvasImage.Source = drawer.AddShape(newShape);
+                            ShapeList.SelectedIndex = ShapeList.Items.Count - 1;
+                            StopDrawing();
+                        }
+                        else
+                        {
+                            previousClickPoints.Add(clickPoint);
+                            activeProjectionPoints.Add(CreateProjectionPoint(clickPoint));
+                        }
+                        break;
+
+
                     default:
                         throw new NotImplementedException();       
                 }
@@ -189,8 +208,6 @@ namespace cgshop
             }
            
         }
-
-     
 
         private void DeselectShape()
         {
@@ -258,6 +275,8 @@ namespace cgshop
                 ShapeColorSettingTab.Visibility = System.Windows.Visibility.Visible;
                 ShapeThicknessSettingTab.Visibility = System.Windows.Visibility.Visible;
                 ShapeAntialiasingSettingTab.Visibility = System.Windows.Visibility.Visible;
+                ShapeFillSettingTab.Visibility = System.Windows.Visibility.Hidden;
+                ShapeFillColorSettingTab.Visibility = System.Windows.Visibility.Hidden;
 
                 // Sync shape settings
                 ShapeThicknessSetting.Value = (selectedShape as Line).Thickness;
@@ -271,6 +290,8 @@ namespace cgshop
                 ShapeColorSettingTab.Visibility = System.Windows.Visibility.Visible;
                 ShapeThicknessSettingTab.Visibility = System.Windows.Visibility.Hidden;
                 ShapeAntialiasingSettingTab.Visibility = System.Windows.Visibility.Hidden;
+                ShapeFillSettingTab.Visibility = System.Windows.Visibility.Hidden;
+                ShapeFillColorSettingTab.Visibility = System.Windows.Visibility.Hidden;
 
                 // Sync shape settings
                 Color c = (selectedShape as Circle).Color;
@@ -281,13 +302,36 @@ namespace cgshop
                 ShapeColorSettingTab.Visibility = System.Windows.Visibility.Visible;
                 ShapeThicknessSettingTab.Visibility = System.Windows.Visibility.Visible;
                 ShapeAntialiasingSettingTab.Visibility = System.Windows.Visibility.Visible;
-
+                ShapeFillSettingTab.Visibility = System.Windows.Visibility.Visible;
+                ShapeFillColorSettingTab.Visibility = System.Windows.Visibility.Visible;
+                
                 // Sync shape settings
                 ShapeThicknessSetting.Value = (selectedShape as Poly).Thickness;
                 Color c = (selectedShape as Poly).Color;
                 ShapeColorSetting.SelectedColor = System.Windows.Media.Color.FromArgb(c[3], c[2], c[1], c[0]);
                 ShapeAntialiasingSetting.IsChecked = (selectedShape as Poly).Antialiased;
+                ShapeFillSetting.IsChecked = (selectedShape as Poly).Filled;
+                Color f = (selectedShape as Poly).FillColor;
+                ShapeFillColorSetting.SelectedColor = System.Windows.Media.Color.FromArgb(f[3], f[2], f[1], f[0]);
             }
+            else if (selectedShape.GetType() == typeof(Rectangle))
+            {
+                ShapeColorSettingTab.Visibility = System.Windows.Visibility.Visible;
+                ShapeThicknessSettingTab.Visibility = System.Windows.Visibility.Visible;
+                ShapeAntialiasingSettingTab.Visibility = System.Windows.Visibility.Visible;
+                ShapeFillSettingTab.Visibility = System.Windows.Visibility.Visible;
+                ShapeFillColorSettingTab.Visibility = System.Windows.Visibility.Visible;
+
+                // Sync shape settings
+                ShapeThicknessSetting.Value = (selectedShape as Rectangle).Thickness;
+                Color c = (selectedShape as Rectangle).Color;
+                ShapeColorSetting.SelectedColor = System.Windows.Media.Color.FromArgb(c[3], c[2], c[1], c[0]);
+                ShapeAntialiasingSetting.IsChecked = (selectedShape as Poly).Antialiased;
+                ShapeFillSetting.IsChecked = (selectedShape as Rectangle).Filled;
+                Color f = (selectedShape as Rectangle).FillColor;
+                ShapeFillColorSetting.SelectedColor = System.Windows.Media.Color.FromArgb(f[3], f[2], f[1], f[0]);
+            }
+
 
 
             // Add new dragging points
@@ -378,14 +422,51 @@ namespace cgshop
                 // Ensure restrictions
                 if (position.Y - DRAGGING_POINT_SIZE / 2 < 0) { position.Y = 0 - DRAGGING_POINT_SIZE / 2; }
 
-                Canvas.SetLeft(draggedItem, position.X);
-                Canvas.SetTop(draggedItem, position.Y);
+                if (selectedShape.GetType() == typeof(Rectangle))
+                {
+                    Canvas.SetLeft(draggedItem, position.X);
+                    Canvas.SetTop(draggedItem, position.Y);
 
-                // Set new value to point
-                Point newPoint = CalculatePointValueFromCanvasPosition(new Point(Canvas.GetLeft(draggedItem), Canvas.GetTop(draggedItem))); ;
-                selectedShape.GetPoints()[draggedItemIndex].X = newPoint.X;
-                selectedShape.GetPoints()[draggedItemIndex].Y = newPoint.Y;
+                    if (draggedItemIndex % 2 == 0) // When dragging points are those on rising diagonal
+                    {                
+                        Canvas.SetTop(activeDraggingPoints[Utils.Mod(draggedItemIndex - 1, 4)], position.Y);  // Move connected point1 (counterclockwise) 
+                        Canvas.SetLeft(activeDraggingPoints[Utils.Mod(draggedItemIndex + 1, 4)], position.X); // Move connected point2 (clockwise)
+                    }
+                    else
+                    {
+                        Canvas.SetLeft(activeDraggingPoints[Utils.Mod(draggedItemIndex - 1, 4)], position.X);  // Move connected point1 (counterclockwise) 
+                        Canvas.SetTop(activeDraggingPoints[Utils.Mod(draggedItemIndex + 1, 4)], position.Y); // Move connected point2 (clockwise)
+                    }
 
+                    // Set new value to point
+                    Point newPoint = CalculatePointValueFromCanvasPosition(new Point(Canvas.GetLeft(draggedItem), Canvas.GetTop(draggedItem)));
+
+                    // Move dragging point
+                    selectedShape.GetPoints()[draggedItemIndex].X = newPoint.X;
+                    selectedShape.GetPoints()[draggedItemIndex].Y = newPoint.Y;
+
+                    if (draggedItemIndex % 2 == 0) // When dragging points are those on rising diagonal
+                    {                   
+                        selectedShape.GetPoints()[Utils.Mod(draggedItemIndex - 1, 4)].Y = newPoint.Y; // Move connected point1 (counterclockwise)
+                        selectedShape.GetPoints()[Utils.Mod(draggedItemIndex + 1, 4)].X = newPoint.X; // Move connected point2 (clockwise)
+                    }
+                    else
+                    {
+                        selectedShape.GetPoints()[Utils.Mod(draggedItemIndex - 1, 4)].X = newPoint.X; // Move connected point1 (counterclockwise)
+                        selectedShape.GetPoints()[Utils.Mod(draggedItemIndex + 1, 4)].Y = newPoint.Y; // Move connected point2 (clockwise)
+                    }
+                }
+                else
+                {
+                    Canvas.SetLeft(draggedItem, position.X);
+                    Canvas.SetTop(draggedItem, position.Y);
+
+                    // Set new value to point
+                    Point newPoint = CalculatePointValueFromCanvasPosition(new Point(Canvas.GetLeft(draggedItem), Canvas.GetTop(draggedItem)));
+                    selectedShape.GetPoints()[draggedItemIndex].X = newPoint.X;
+                    selectedShape.GetPoints()[draggedItemIndex].Y = newPoint.Y;
+                }
+               
                 CanvasImage.Source = drawer.RedrawCanvas();
             }
         }
@@ -490,6 +571,10 @@ namespace cgshop
                 {
                     (selectedShape as Poly).Thickness = (int)ShapeThicknessSetting.Value;
                 }
+                else if (selectedShape.GetType() == typeof(Rectangle))
+                {
+                    (selectedShape as Rectangle).Thickness = (int)ShapeThicknessSetting.Value;
+                }
 
                 CanvasImage.Source = drawer.RedrawCanvas();
             }
@@ -512,6 +597,10 @@ namespace cgshop
                 {
                     (selectedShape as Poly).Color = new Color(ShapeColorSetting.SelectedColor.Value);
                 }
+                else if (selectedShape.GetType() == typeof(Rectangle))
+                {
+                    (selectedShape as Rectangle).Color = new Color(ShapeColorSetting.SelectedColor.Value);
+                }
 
                 CanvasImage.Source = drawer.RedrawCanvas();
             }           
@@ -527,6 +616,42 @@ namespace cgshop
             {
                 (selectedShape as Poly).Antialiased = ShapeAntialiasingSetting.IsChecked.Value;
             }
+            else if (selectedShape.GetType() == typeof(Rectangle))
+            {
+                (selectedShape as Rectangle).Antialiased = ShapeAntialiasingSetting.IsChecked.Value;
+            }
+
+            CanvasImage.Source = drawer.RedrawCanvas();
+        }
+
+        private void ShapeFillColorSetting_SelectedColorChanged(object sender, System.Windows.RoutedPropertyChangedEventArgs<System.Windows.Media.Color?> e)
+        {
+            if (selectedShape != null)
+            {
+                if (selectedShape.GetType() == typeof(Poly))
+                {
+                    (selectedShape as Poly).FillColor = new Color(ShapeFillColorSetting.SelectedColor.Value);
+                }
+                else if (selectedShape.GetType() == typeof(Rectangle))
+                {
+                    (selectedShape as Rectangle).FillColor = new Color(ShapeFillColorSetting.SelectedColor.Value);
+                }
+
+                CanvasImage.Source = drawer.RedrawCanvas();
+            }
+        }
+
+        private void ShapeFillSetting_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (selectedShape.GetType() == typeof(Poly))
+            {
+                (selectedShape as Poly).Filled = ShapeFillSetting.IsChecked.Value;
+            }
+            else if (selectedShape.GetType() == typeof(Rectangle))
+            {
+                (selectedShape as Rectangle).Filled = ShapeFillSetting.IsChecked.Value;
+            }
+
 
             CanvasImage.Source = drawer.RedrawCanvas();
         }

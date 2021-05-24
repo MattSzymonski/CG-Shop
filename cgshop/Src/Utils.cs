@@ -98,6 +98,11 @@ namespace cgshop
 
     public static class Utils
     {
+        public static int Mod(int x, int m)
+        {
+            return (x % m + m) % m;
+        }
+
         public static float Lerp(float a, float b, float factor)
         {
             return a * (1 - factor) + b * factor;

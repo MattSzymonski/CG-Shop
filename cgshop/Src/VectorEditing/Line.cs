@@ -179,7 +179,7 @@ namespace cgshop
                     {
                         float w = (float)thickness / 2;
 
-                        Console.WriteLine(w + " " + r + " " + distance);
+                        //Console.WriteLine(w + " " + r + " " + distance);
 
                         distance = Math.Abs(distance);
 

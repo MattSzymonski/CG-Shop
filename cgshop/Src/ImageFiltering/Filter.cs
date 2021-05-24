@@ -198,9 +198,9 @@ namespace cgshop
             var bitmap = new WriteableBitmap(original);
 
             //Console.WriteLine(bitmap.BackBufferStride);
-            Console.WriteLine(bitmap.Format.BitsPerPixel.ToString());
-            Console.WriteLine(bitmap.BackBufferStride);
-            Console.WriteLine(bitmap.DpiX);
+            //Console.WriteLine(bitmap.Format.BitsPerPixel.ToString());
+            //Console.WriteLine(bitmap.BackBufferStride);
+            //Console.WriteLine(bitmap.DpiX);
 
             //32
             //3204

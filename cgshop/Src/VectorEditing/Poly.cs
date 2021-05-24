@@ -38,11 +38,18 @@ namespace cgshop
         }
 
 
-        private bool filled = true;
+        private bool filled;
         public bool Filled
         {
             get { return filled; }
             set { filled = value; }
+        }
+
+        private Color fillColor;
+        public Color FillColor
+        {
+            get { return fillColor; }
+            set { fillColor = value; }
         }
 
         public Poly(String name, List<Point> points, int thickness, Color color) : base(name)
@@ -57,6 +64,8 @@ namespace cgshop
             this.points = points;
             this.thickness = thickness;
             this.color = color;
+            this.filled = false;
+            this.fillColor = new Color(0, 0, 255, 255);
         }
 
         public override List<Point> GetPoints()
@@ -104,7 +113,7 @@ namespace cgshop
 
                 foreach (Point p in toFill)
                 {
-                    Utils.SetPixel(pBuffer, bitmap, (int)p.X, (int)p.Y, new cgshop.Color(0, 0, 255, 255));
+                    Utils.SetPixel(pBuffer, bitmap, (int)p.X, (int)p.Y, fillColor);
                 }
             }
 

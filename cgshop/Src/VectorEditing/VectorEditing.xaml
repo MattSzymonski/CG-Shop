@@ -64,7 +64,7 @@
                 <Grid Margin="5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height ="40" />
-                        <RowDefinition Height ="160" />
+                        <RowDefinition Height ="220" />
                         <RowDefinition Height ="*" />
                     </Grid.RowDefinitions >
                     <Grid.ColumnDefinitions >
@@ -97,6 +97,14 @@
                                     <DockPanel Name="ShapeAntialiasingSettingTab">
                                         <Label Content="Anti-aliasing:"/>
                                         <CheckBox Name="ShapeAntialiasingSetting" Margin="5" HorizontalAlignment="Right" Click="ShapeAntialiasingSetting_Click" IsChecked="False"/>
+                                    </DockPanel>
+                                    <DockPanel Name="ShapeFillSettingTab">
+                                        <Label Content="Fill:"/>
+                                        <CheckBox Name="ShapeFillSetting" Margin="5" HorizontalAlignment="Right" Click="ShapeFillSetting_Click" IsChecked="False"/>
+                                    </DockPanel>
+                                    <DockPanel Name="ShapeFillColorSettingTab">
+                                        <Label Content="Fill Color:"/>
+                                        <wT:ColorPicker x:Name="ShapeFillColorSetting"  Margin="5" SelectedColor="Red" SelectedColorChanged="ShapeFillColorSetting_SelectedColorChanged"/>
                                     </DockPanel>
                                 </StackPanel>
                             </StackPanel>
