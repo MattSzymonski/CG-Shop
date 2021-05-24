@@ -182,10 +182,10 @@ namespace cgshop
                 ET.TryGetValue(currentY, out bucketContents); //[currentY];
 
                 if (bucketContents != null)
-                {               
+                {
+                    bucketContents = bucketContents.Where(x => x.yMax != x.yMin).ToList(); // Remove horizontal lines
                     AET.AddRange(bucketContents); // move bucket from ET to AET
-                    ET.Remove(currentY);
-                    
+                    ET.Remove(currentY);            
                 }
 
                 AET = AET.OrderBy(l => l.xCurrent).ToList();
