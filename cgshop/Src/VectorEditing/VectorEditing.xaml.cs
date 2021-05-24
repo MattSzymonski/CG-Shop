@@ -22,7 +22,6 @@ using System.Xml.Serialization;
 
 namespace cgshop
 {
-
     public enum ShapeType
     {
         Line,
@@ -30,6 +29,7 @@ namespace cgshop
         Poly,
         Capsule,
         Rectangle,
+        ClippingLine,
     }
 
     public partial class VectorEditing : Page, INotifyPropertyChanged
@@ -57,6 +57,8 @@ namespace cgshop
         private Ellipse activeDraggingPoint;
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        private Poly lastCreatedPoly; // For Cyrus-Beck 
 
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
@@ -104,6 +106,7 @@ namespace cgshop
 
                     case (ShapeType.Line):
                     case (ShapeType.Circle):
+                    case (ShapeType.ClippingLine):
 
                         if (previousClickPoints.Count >= 1)
                         {
@@ -119,6 +122,10 @@ namespace cgshop
 
                                 case ShapeType.Circle:
                                     newShape = new Circle(selectedShapeType.ToString(), p1, p2, new Color(0, 0, 0, 255));
+                                    break;
+
+                                case ShapeType.ClippingLine:
+                                    newShape = new ClippingLine(selectedShapeType.ToString(), p1, p2, 1, new Color(0, 0, 0, 255), lastCreatedPoly);
                                     break;
 
                                 default:
@@ -144,6 +151,8 @@ namespace cgshop
                             if (clickPoint.Distance(previousClickPoints[0]) < (double)FINISH_POLY_THRESHOLD) { // If is new point is near the first placed point then create polygon
                                 Shape newShape = new Poly(selectedShapeType.ToString(), new List<Point>(previousClickPoints), 1, new Color(0, 0, 0, 255));
                                 CanvasImage.Source = drawer.AddShape(newShape);
+
+                                lastCreatedPoly = newShape as Poly; // For Cyrus-Beck algorithm
 
                                 ShapeList.SelectedIndex = ShapeList.Items.Count - 1;
                                 StopDrawing();
@@ -330,6 +339,15 @@ namespace cgshop
                 ShapeFillSetting.IsChecked = (selectedShape as Rectangle).Filled;
                 Color f = (selectedShape as Rectangle).FillColor;
                 ShapeFillColorSetting.SelectedColor = System.Windows.Media.Color.FromArgb(f[3], f[2], f[1], f[0]);
+            }
+
+            else if (selectedShape.GetType() == typeof(ClippingLine))
+            {
+                ShapeColorSettingTab.Visibility = System.Windows.Visibility.Hidden;
+                ShapeThicknessSettingTab.Visibility = System.Windows.Visibility.Hidden;
+                ShapeAntialiasingSettingTab.Visibility = System.Windows.Visibility.Hidden;
+                ShapeFillSettingTab.Visibility = System.Windows.Visibility.Hidden;
+                ShapeFillColorSettingTab.Visibility = System.Windows.Visibility.Hidden;
             }
 
 

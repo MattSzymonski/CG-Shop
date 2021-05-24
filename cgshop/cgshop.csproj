@@ -82,6 +82,7 @@
     <Compile Include="Src\Utils.cs" />
     <Compile Include="Src\VectorEditing\Capsule.cs" />
     <Compile Include="Src\VectorEditing\Circle.cs" />
+    <Compile Include="Src\VectorEditing\ClippingLine.cs" />
     <Compile Include="Src\VectorEditing\Drawer.cs" />
     <Compile Include="Src\VectorEditing\Line.cs" />
     <Compile Include="Src\VectorEditing\Poly.cs" />
