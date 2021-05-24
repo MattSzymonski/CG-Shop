@@ -87,7 +87,7 @@ namespace cgshop
             CanvasImage.Source = drawer.canvas;
 
             ShapeSelector.ItemsSource = Enum.GetValues(typeof(ShapeType));
-            ShapeSelector.SelectedIndex = 3;
+            ShapeSelector.SelectedIndex = 2;
             
             ShapeList.ItemsSource = drawer.shapes;
             CanvasImage.Source = drawer.RedrawCanvas();

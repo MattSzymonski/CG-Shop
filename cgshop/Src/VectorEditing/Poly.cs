@@ -13,93 +13,8 @@ using cgshop.point;
 
 namespace cgshop
 {
-    public class AET
-    {
-        Poly polygon;
-        public List<AETnode> nodes = new List<AETnode>();
-        public List<AETnode> sortedNodes = new List<AETnode>();
-        public int minimalY;
-        public int maximalY;
-        public AET(Poly poly)
-        {
-            polygon = poly;
-            for (int i = 0; i < polygon.points.Count - 1; i++)
-            {
-                nodes.Add(new AETnode(polygon.points[i].Y, polygon.points[i + 1].Y,
-                                      polygon.points[i].X, polygon.points[i + 1].X));
-            }
-            sortedNodes = nodes.Where(x => x.isSlopeZero == false).
-                                OrderBy(x => x.yMin).
-                                ThenBy(x => x.yMax).
-                                ThenBy(x => x.xVal).ToList();
-            minimalY = sortedNodes.Min(x => x.yMin);
-            maximalY = sortedNodes.Max(x => x.yMax);
-        }
-    }
-
-    public class AETnode
-    {
-        public int yMin;
-        public int yMax;
-        public double xVal;
-        public double xMax;
-        public int dx;
-        public int dy;
-        public int signCoeff;
-        public int dummy = 0;
-
-        public double mInv
-        {
-            get
-            {
-                return ((xMax - xVal) / (yMax - yMin));
-            }
-            set { }
-        }
-        public bool isSlopeZero { get { return (yMax - yMin == 0 ? true : false); } set { } }
-        public AETnode(int y1, int y2, int x1, int x2)
-        {
-            if (y1 < y2)
-            {
-                yMin = y1;
-                yMax = y2;
-                xVal = x1;
-                xMax = x2;
-            }
-            else if (y1 > y2)
-            {
-                yMin = y2;
-                yMax = y1;
-                xVal = x2;
-                xMax = x1;
-            }
-            else
-            {
-                yMin = yMax = y1;
-                xVal = x1 <= x2 ? x1 : x2;
-                xMax = x1 <= x2 ? x2 : x1;
-            }
-            if (xMax > xVal)
-            {
-                signCoeff = 1;
-            }
-            else
-            {
-                signCoeff = -1;
-            }
-            dx = Math.Abs(x1 - x2);
-            dy = Math.Abs(y1 - y2);
-
-
-        }
-    }
-
-
     public class Poly : Shape
     {
-        public List<AETnode> polygonTable = new List<AETnode>();
-        private int yMinTemp;
-
         public List<Point> points;
         List<Line> lines;
 
@@ -130,12 +45,8 @@ namespace cgshop
             set { filled = value; }
         }
 
-        Dictionary<int, List<AETnode>> edgeTable = new Dictionary<int, List<AETnode>>();
-
-
         public Poly(String name, List<Point> points, int thickness, Color color) : base(name)
         {
-            //this.points = points;
             lines = new List<Line>();
 
             for (int i = 0; i < points.Count; i++)
@@ -144,8 +55,6 @@ namespace cgshop
             }
 
             this.points = points;
-            // this.points = new List<Point>();
-            //this.points = points;
             this.thickness = thickness;
             this.color = color;
         }
@@ -168,25 +77,10 @@ namespace cgshop
             }  
 
             // Draw lines
-           // BitmapImage canvasInter = canvas;
             foreach (var line in lines) 
             {
                 canvasInter = line.Draw(canvasInter);
             }
-
-
-            //if (filled)
-            //{
-            //    List<Point> toFill = new List<Point>();
-            //    toFill = this.pointsToFill();
-
-            //    foreach (Point p in toFill)
-            //    {
-            //        tempBit.SetPixel(p.X, p.Y, new cgshop.Color(0, 0, 255, 255));
-            //    }
-
-            //}
-           
 
             return canvasInter;
         }
@@ -206,13 +100,11 @@ namespace cgshop
 
             {
                 List<Point> toFill = new List<Point>();
-                toFill = this.pointsToFill();
+                toFill = this.pixelsToFill();
 
                 foreach (Point p in toFill)
                 {
                     Utils.SetPixel(pBuffer, bitmap, (int)p.X, (int)p.Y, new cgshop.Color(0, 0, 255, 255));
-
-                    //tempBit.SetPixel(p.X, p.Y, new cgshop.Color(0, 0, 255, 255));
                 }
             }
 
@@ -235,72 +127,153 @@ namespace cgshop
         }
 
 
+       
 
-
-
-
-
-        public List<Point> pointsToFill()
+        public List<Point> pixelsToFill()
         {
-            AET tempAET = new AET(this);
-            List<AETnode> temp = tempAET.nodes.OrderBy(x => x.yMin).ToList();
-            yMinTemp = temp[0].yMin;
-            int tempY = yMinTemp;
-            while (temp.Count != 0)
-            {
-                if (temp.Where(x => x.yMin == tempY).Count() != 0)
-                {
-                    List<AETnode> bucketTable = temp.Where(x => x.yMin == tempY).ToList();
-                    temp.RemoveAll(x => x.yMin == tempY);
-                    edgeTable.Add(tempY, bucketTable.OrderBy(x => x.xVal).ToList());
-                }
-                tempY++;
-            }
-            List<Point> pointsFill = new List<Point>();
-            int y = yMinTemp;
-            polygonTable.Clear();
-            do
-            {
-                List<AETnode> bucket;
-                if (edgeTable.TryGetValue(y, out bucket))
-                {
-                    polygonTable.AddRange(bucket);
+            int smallestY = this.points.OrderBy(p => p.Y).First().Y;
+            int smallestX = this.points.OrderBy(p => p.X).First().X;
+            int largestY = this.points.OrderBy(p => p.Y).Last().Y;
+            int largestX = this.points.OrderBy(p => p.X).Last().X;
+           
+            // Create edge table
+            var ET = new Dictionary<int, List<ETNode>>();
 
-                }
-                polygonTable = polygonTable.OrderBy(x => x.xVal).ToList();
-                for (int i = 0; i < polygonTable.Count - 1; i += 2)
+            // Fill buckets
+            var linesProcessed = new List<Line>();
+            for (int y = smallestY; y < largestY + 1; y++)
+            {
+                var linesIntersecting = lines.Where(l => l.GetPoints().Where(p => p.Y == y).Count() != 0).ToList(); // Lines that starts or ends in that y
+                var linesStartingAtCurrentY = new List<Line>();
+                foreach (var line in linesIntersecting)
                 {
-                    int x = (int)polygonTable[i].xVal;
-                    while (x != polygonTable[i + 1].xVal)
+                    if (!linesProcessed.Contains(line))
                     {
-                        pointsFill.Add(new Point(x, y));
-                        x++;
+                        linesStartingAtCurrentY.Add(line);
+                        linesProcessed.Add(line);
                     }
                 }
-                y++;
-                polygonTable.RemoveAll(x => x.yMax == y);
-                foreach (AETnode n in polygonTable)
+
+                if (linesStartingAtCurrentY.Count > 0)
                 {
-                    n.dummy += n.dx;
-                    if (n.dummy > n.dy)
+                    var nodes = new List<ETNode>();
+                    nodes.AddRange(linesStartingAtCurrentY.Select(l => new ETNode(l))); // Convert lines to ETNodes
+                    ET.Add(y, nodes);
+                }              
+            }
+
+            // Get scanline points
+            List<Point> fillPoints = new List<Point>();
+
+            int currentY = smallestY;
+            var AET = new List<ETNode>();
+            while (AET.Count != 0 || ET.Count != 0)
+            {
+                List<ETNode> bucketContents;
+                ET.TryGetValue(currentY, out bucketContents); //[currentY];
+
+                if (bucketContents != null)
+                {               
+                    AET.AddRange(bucketContents); // move bucket from ET to AET
+                    ET.Remove(currentY);
+                    
+                }
+
+                AET = AET.OrderBy(l => l.xCurrent).ToList();
+
+                // Add one scanline fill points
+                if (AET.Count % 2 == 1)
+                {
+                    throw new Exception();
+                }
+
+                for (int i = 0; i < AET.Count; i += 2)
+                {
+                    for (int x = (int)AET[i].xCurrent; x < AET[i + 1].xCurrent; x++)
                     {
-                        int k;
-                        try
+                        fillPoints.Add(new Point(x, currentY));
+                    }
+                }
+                currentY++;
+
+                for (int i = AET.Count - 1; i >= 0; i--)
+                {
+                    if (AET[i].yMax == currentY)
+                    {
+                        AET.Remove(AET[i]);
+                    }
+                    else
+                    {
+                        AET[i].inc += AET[i].dx;
+                        if (AET[i].inc > AET[i].dy)
                         {
-                            k = n.dummy / n.dy;
+                            int k;
+                            if (AET[i].dy == 0)
+                            {
+                                k = int.MaxValue;
+                            }
+                            else
+                            {
+                                k = AET[i].inc / AET[i].dy;
+                            }
+                            AET[i].xCurrent += k * AET[i].sign;
+                            AET[i].inc -= k * AET[i].dy;
                         }
-                        catch (DivideByZeroException e)
-                        {
-                            k = int.MaxValue;
-                        }
-                        n.xVal += k * n.signCoeff;
-                        n.dummy -= k * n.dy;
                     }
                 }
             }
-            while (polygonTable.Count > 0);
-            edgeTable.Clear();
-            return pointsFill;
+
+            return fillPoints;
+        }
+
+        public class ETNode
+        {
+            public int yMin;
+            public int yMax;
+            public double xCurrent;
+            public double xMax;
+            public int dx;
+            public int dy;
+            public int sign;
+            public double inv { get { return ((xMax - xCurrent) / (yMax - yMin)); } }
+            public int inc = 0;
+
+            public ETNode(Line line)
+            {
+                var p1 = line.GetPoints()[0];
+                var p2 = line.GetPoints()[1];
+                
+                if (p1.Y < p2.Y)
+                {
+                    yMin = p1.Y;
+                    yMax = p2.Y;
+                    xCurrent = p1.X;
+                    xMax = p2.X;
+                }
+                else if (p1.Y > p2.Y)
+                {
+                    yMin = p2.Y;
+                    yMax = p1.Y;
+                    xCurrent = p2.X;
+                    xMax = p1.X;
+                }
+                else
+                {
+                    yMin = yMax = p1.Y;
+                    xCurrent = p1.X <= p2.X ? p1.X : p2.X;
+                    xMax = p1.X <= p2.X ? p2.X : p1.X;
+                }
+                if (xMax > xCurrent)
+                {
+                    sign = 1;
+                }
+                else
+                {
+                    sign = -1;
+                }
+                dx = Math.Abs(p1.X - p2.X);
+                dy = Math.Abs(p1.Y - p2.Y);
+            }
         }
     }
 }
