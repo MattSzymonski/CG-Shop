@@ -170,76 +170,72 @@ namespace cgshop
 
         bool LineClipping(List<Point> polyVertices, Point startPoint, Point endPoint, out Point trimmedStartPoint, out Point trimmedEndPoint)
         {
-            List<Point> normals = new List<Point>();
-
-            // Calculating the normals 
-            for (int i = 0; i < polyVertices.Count; i++)
+            List<Point> normals = new List<Point>();      
+            for (int i = 0; i < polyVertices.Count; i++) // Calculate normals 
             {
-                normals.Add(new Point(polyVertices[i].Y - polyVertices[(i + 1) % polyVertices.Count].Y, polyVertices[(i + 1) % polyVertices.Count].X - polyVertices[i].X));
+                var normalDir = new Point(polyVertices[i].Y - polyVertices[(i + 1) % polyVertices.Count].Y, polyVertices[(i + 1) % polyVertices.Count].X - polyVertices[i].X);
+                normals.Add(normalDir);
             }
 
-            // Calculating P1 - P0 
-            Point P1_P0 = new Point(endPoint.X - startPoint.X, endPoint.Y - startPoint.Y);
+            Point P1_P0 = new Point(endPoint.X - startPoint.X, endPoint.Y - startPoint.Y);  // P1 - P0 
 
-            // Initializing all values of P0 - PEi 
-            List<Point> P0_PEi = new List<Point>();
+            
+            List<Point> P0_PEi = new List<Point>(); // Initialize all values of P0 - PEi 
 
-
-            // Calculating the values of P0 - PEi for all edges 
-            for (int i = 0; i < polyVertices.Count; i++)
+            for (int i = 0; i < polyVertices.Count; i++) // Calculate values of P0 - PEi for the edges 
             {
-                // Calculating PEi - P0, so that the denominator won't have to multiply by -1 while calculating 't' 
                 P0_PEi.Add(new Point(polyVertices[i].X - startPoint.X, polyVertices[i].Y - startPoint.Y));
             }
 
             List<double> numerator = new List<double>();
             List<double> denominator = new List<double>();
-
-            // Calculating the numerator and denominators 
-            // using the dot function 
-            for (int i = 0; i < polyVertices.Count; i++)
+ 
+            for (int i = 0; i < polyVertices.Count; i++) // Calculate the numerator and denominators using the dot product
             {
                 numerator.Add(dotProduct(normals[i], P0_PEi[i]));
                 denominator.Add(dotProduct(normals[i], P1_P0));
             }
 
-            // Initializing the 't' values dynamically 
+            
             List<double> t = new List<double>();
 
-            // Making two vectors called 't entering' 
-            // and 't leaving' to group the 't's 
-            // according to their denominators 
+            // Make two vectors called 't entering' and 't leaving' to group the 't's according to their denominators 
             List<double> tEntering = new List<double>();
             List<double> tLeaving = new List<double>();
 
-            // Calculating 't' and grouping them accordingly 
-            for (int i = 0; i < polyVertices.Count; i++)
+            for (int i = 0; i < polyVertices.Count; i++)  // Calculate 't' and grouping them accordingly 
             {
                 if (denominator[i] == 0)
+                {
                     t.Add(numerator[i]);
+                }      
                 else
+                {
                     t.Add(numerator[i] / denominator[i]);
-
+                }
+                    
                 if (denominator[i] >= 0)
+                {
                     tEntering.Add(t[i]);
+                }
                 else
+                {
                     tLeaving.Add(t[i]);
+                }          
             }
 
-            // Initializing the final two values of 't' 
             double tEnteringMax;
             double tLeavingMin;
 
-            // Taking the max of all 'tE' and 0, so pushing 0 
+            // Take max of all 'tE' and 0
             tEntering.Add(0);
             tEnteringMax = tEntering.Max();
 
-            // Taking the min of all 'tL' and 1, so pushing 1 
+            // Take the min of all 'tL' and 1
             tLeaving.Add(1);
             tLeavingMin = tLeaving.Min();
 
-            // Entering 't' value cannot be greater than exiting 't' value, hence, this is the case when the line 
-            // is completely outside 
+            // Enter 't' value cannot be greater than exiting 't' value (case when the line is completely outside)
             if (tEnteringMax > tLeavingMin)
             {
                 trimmedStartPoint = new Point(0, 0);
@@ -247,22 +243,10 @@ namespace cgshop
                 return false;
             }
 
-            // Calculating the coordinates in terms of the trimmed x and y 
+            // Calculate coordinates in terms of the trimmed x and y 
             trimmedStartPoint = new Point(startPoint.X + P1_P0.X * tEnteringMax, startPoint.Y + P1_P0.Y * tEnteringMax);
             trimmedEndPoint = new Point(startPoint.X + P1_P0.X * tLeavingMin, startPoint.Y + P1_P0.Y * tLeavingMin);
-
-            bool StartTrimmed = IsSame(startPoint, trimmedStartPoint) ? false : true;
-            bool EndTrimmed = IsSame(endPoint, trimmedEndPoint) ? false : true;
-
-            return true;
-        }
-
-        bool IsSame(Point p1, Point p2)
-        {
-            if (Math.Abs(p1.X - p2.X) < 0.00001 == false)
-                return false;
-            if (Math.Abs(p1.Y - p2.Y) < 0.00001 == false)
-                return false;
+      
             return true;
         }
 
