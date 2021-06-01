@@ -59,6 +59,8 @@ namespace cgshop
         public event PropertyChangedEventHandler PropertyChanged;
 
         private Poly lastCreatedPoly; // For Cyrus-Beck 
+        Color floodFillColor;
+
 
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
@@ -77,6 +79,8 @@ namespace cgshop
             SetupModule();
         }
 
+        public bool floodFill;
+
         private void SetupModule()
         {
             activeDraggingPoints = new List<Ellipse>();
@@ -91,16 +95,33 @@ namespace cgshop
 
             ShapeSelector.ItemsSource = Enum.GetValues(typeof(ShapeType));
             ShapeSelector.SelectedIndex = 4;
-            
+
+            floodFillColor = new Color(0, 0, 0, 255);
+
             ShapeList.ItemsSource = drawer.shapes;
             CanvasImage.Source = drawer.RedrawCanvas();
         }
+
+
+
+
 
         private void CanvasImage_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (Drawing)
             {
                 Point clickPoint = new Point(e.GetPosition(sender as System.Windows.IInputElement));
+
+                if (floodFill)
+                {
+                    CanvasImage.Source = drawer.FloodFill(clickPoint, floodFillColor);
+                    StopDrawing();
+
+                    floodFill = false;
+                    return;
+                }
+
+               
                 switch (selectedShapeType)
                 {
 
@@ -696,7 +717,18 @@ namespace cgshop
 
         private void ButtonSave_Click(object sender, System.Windows.RoutedEventArgs e)
         {
+           
+        }
 
+        private void FloodFillButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            Drawing = true;
+            floodFill = true;
+        }
+
+        private void FloodFillColorSetting_SelectedColorChanged(object sender, System.Windows.RoutedPropertyChangedEventArgs<System.Windows.Media.Color?> e)
+        {
+            floodFillColor = new Color(FloodFillColorSetting.SelectedColor.Value);   
         }
     }
 

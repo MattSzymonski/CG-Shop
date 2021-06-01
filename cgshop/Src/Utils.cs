@@ -51,6 +51,19 @@ namespace cgshop
             return new Color((byte)rb, (byte)rg, (byte)rr, (byte)ra);
         }
 
+        public static bool Same(Color c1, Color c2)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                if (c1[i] != c2[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
 
     }
 
@@ -129,6 +142,28 @@ namespace cgshop
             }
         }
 
+        public unsafe static Color GetPixel(byte* pBuffer, WriteableBitmap bitmap, int x, int y)
+        {
+            if (y > bitmap.Height - 1 || y < 0 || x > bitmap.Width - 1 || x < 0)
+                return null;
+
+            Color pixelColor = new Color();
+
+            for (int i = 0; i < 3; i++) // For each color channel
+            {
+                try
+                {
+                    int index = 4 * x + (y * bitmap.BackBufferStride) + i;
+                    pixelColor[i] = pBuffer[index];
+                }
+                catch
+                {
+                    continue;
+                }
+            }
+
+            return pixelColor;
+        }
 
         public static T Clamp<T>(this T val, T min, T max) where T : IComparable<T>
         {
