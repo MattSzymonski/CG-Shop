@@ -24,7 +24,6 @@ namespace cgshop
         public abstract unsafe BitmapImage Draw(BitmapImage canvas);
         public abstract List<Point> GetPoints();
 
-
         public Shape(string name)
         {
             this.name = name;
@@ -38,7 +37,6 @@ namespace cgshop
 
         public ObservableCollection<Shape> shapes = new ObservableCollection<Shape>();
         public Shape selectedShape;
-
 
         public Drawer(BitmapImage canvas)
         {
@@ -126,7 +124,5 @@ namespace cgshop
             //canvas = bitmapImage;
             return bitmapImage;
         }
-
     }
-
 }

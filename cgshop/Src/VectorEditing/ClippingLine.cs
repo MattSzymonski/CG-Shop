@@ -15,7 +15,6 @@ namespace cgshop
 {
     // Draw polygon and then clipping line, in this exact order. Drawn line will be clipping with this polygon only
 
-
     [System.Xml.Serialization.XmlInclude(typeof(Color))]
     [System.Xml.Serialization.XmlRoot("Shape")]
     public class ClippingLine : Shape
@@ -86,7 +85,8 @@ namespace cgshop
                 Point t1 = null;
                 Point t2 = null;
 
-                LineClipping(targetPoly.points, p1, p2, out t1, out t2);
+                if (targetPoly != null)
+                    LineClipping(targetPoly.points, p1, p2, out t1, out t2);
 
                 if (t1 != null)
                 {
@@ -196,7 +196,6 @@ namespace cgshop
                 denominator.Add(dotProduct(normals[i], P1_P0));
             }
 
-            
             List<double> t = new List<double>();
 
             // Make two vectors called 't entering' and 't leaving' to group the 't's according to their denominators 

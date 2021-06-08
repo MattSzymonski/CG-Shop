@@ -69,7 +69,6 @@ namespace cgshop
 
     namespace point
     {
-
         public class Point
         {
             public int X;
@@ -102,8 +101,38 @@ namespace cgshop
             {
                 return "Point: " + X + ", " + Y;
             }
-
         }
+
+        public class Point3d
+        {
+            public int X;
+            public int Y;
+            public int Z;
+            public int W;
+
+            public Point3d(int x, int y, int z, int w)
+            {
+                this.X = x;
+                this.Y = y;
+                this.Z = z;
+                this.W = w;
+            }
+
+            public Point3d(double x, double y, double z, double w)
+            {
+                this.X = (int)x;
+                this.Y = (int)y;
+                this.Z = (int)z;
+                this.W = (int)w;
+            }
+
+            public override string ToString()
+            {
+                return "Point: " + X + ", " + Y + ", " + Z + ", " + W;
+            }
+        }
+
+
     }
 
    

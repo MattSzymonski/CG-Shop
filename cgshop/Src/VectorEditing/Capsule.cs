@@ -82,7 +82,5 @@ namespace cgshop
 
             return canvasInter;
         }
-
     }
-
 }

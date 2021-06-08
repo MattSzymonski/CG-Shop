@@ -13,7 +13,6 @@ using cgshop.point;
 
 namespace cgshop
 {
-
     [System.Xml.Serialization.XmlInclude(typeof(Color))]
     [System.Xml.Serialization.XmlRoot("Shape")]
     public class Line : Shape
@@ -26,7 +25,6 @@ namespace cgshop
             get { return thickness; }
             set { thickness = value; }
         }
-
         
         private Color color;
         public Color Color

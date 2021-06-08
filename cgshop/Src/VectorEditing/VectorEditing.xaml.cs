@@ -19,6 +19,7 @@ using cgshop.point;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
+using System.Diagnostics;
 
 namespace cgshop
 {

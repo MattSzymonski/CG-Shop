@@ -37,7 +37,6 @@ namespace cgshop
             set { antialiased = value; foreach (var line in lines) { line.Antialiased = antialiased; } }
         }
 
-
         private bool filled;
         public bool Filled
         {
@@ -72,8 +71,6 @@ namespace cgshop
         {
             return points;
         }
-
-
 
         public override unsafe BitmapImage Draw(BitmapImage canvas)
         {
@@ -135,9 +132,6 @@ namespace cgshop
             return bitmapImage;
         }
 
-
-       
-
         public List<Point> pixelsToFill()
         {
             int smallestY = this.points.OrderBy(p => p.Y).First().Y;
@@ -196,6 +190,7 @@ namespace cgshop
                     throw new Exception();
                 }
 
+                // Add points of scanline which are between the lines (inside the shape)
                 for (int i = 0; i < AET.Count; i += 2)
                 {
                     for (int x = (int)AET[i].xCurrent; x < AET[i + 1].xCurrent; x++)

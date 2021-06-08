@@ -57,7 +57,6 @@ namespace cgshop
             int stride = bitmap.BackBufferStride;
             int bytesPerPixel = (bitmap.Format.BitsPerPixel + 7) / 8;
 
-
             { // Midpoint Circle Algorithm
 
                 Point midPoint = points[0];
@@ -103,8 +102,6 @@ namespace cgshop
                     Utils.SetPixel(pBuffer, bitmap, -y + midPoint.X, -x + midPoint.Y, color); // 5
                 }
             }
-
-
 
             bitmap.Unlock();
 
