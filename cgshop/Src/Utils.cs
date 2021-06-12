@@ -105,12 +105,12 @@ namespace cgshop
 
         public class Point3d
         {
-            public int X;
-            public int Y;
-            public int Z;
-            public int W;
+            public double X;
+            public double Y;
+            public double Z;
+            public double W;
 
-            public Point3d(int x, int y, int z, int w)
+            public Point3d(double x, double y, double z, double w = 1)
             {
                 this.X = x;
                 this.Y = y;
@@ -118,12 +118,26 @@ namespace cgshop
                 this.W = w;
             }
 
-            public Point3d(double x, double y, double z, double w)
+            public Point3d(Point3d p)
             {
-                this.X = (int)x;
-                this.Y = (int)y;
-                this.Z = (int)z;
-                this.W = (int)w;
+                this.X = p.X;
+                this.Y = p.Y;
+                this.Z = p.Z;
+                this.W = p.W;
+            }
+
+            public Point3d Duplicate(Point3d p)
+            {
+                var newPoint = new Point3d(p.X, p.Y, p.Z, p.W);
+                return newPoint;
+            }
+
+            public void Update(Point3d p)
+            {
+                this.X = p.X;
+                this.Y = p.Y;
+                this.Z = p.Z;
+                this.W = p.W;
             }
 
             public override string ToString()

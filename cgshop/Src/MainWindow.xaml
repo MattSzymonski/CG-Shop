@@ -9,12 +9,15 @@
         Title="cgshop" Height="650" Width="1150" Icon="../Res/Logo2.png">
 
     <Grid>
-        <TabControl SelectedIndex="1">
+        <TabControl SelectedIndex="0">
             <TabItem Header="Image Filtering">
                 <Frame Source="ImageFiltering/ImageFiltering.xaml" />
             </TabItem>
             <TabItem Header="Vector Editing">
                 <Frame Source="VectorEditing/VectorEditing.xaml" />
+            </TabItem>
+            <TabItem Header="3D Graphics">
+                <Frame Source="Graphics3d/Graphics3d.xaml" />
             </TabItem>
         </TabControl>
 

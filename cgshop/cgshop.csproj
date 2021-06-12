@@ -39,6 +39,10 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -72,7 +76,18 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Src\Graphics3d\Camera.cs" />
     <Compile Include="Src\Converters.cs" />
+    <Compile Include="Src\Graphics3d\Cone.cs" />
+    <Compile Include="Src\Graphics3d\Cuboid.cs" />
+    <Compile Include="Src\Graphics3d\Cylinder.cs" />
+    <Compile Include="Src\Graphics3d\Drawer3d.cs" />
+    <Compile Include="Src\Graphics3d\Graphics3d.xaml.cs">
+      <DependentUpon>Graphics3d.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Src\Graphics3d\Line3d.cs" />
+    <Compile Include="Src\Graphics3d\Sphere.cs" />
+    <Compile Include="Src\Graphics3d\Triangle3d.cs" />
     <Compile Include="Src\ImageFiltering\FilterSettings.cs" />
     <Compile Include="Src\ImageFiltering\ImageFiltering.xaml.cs">
       <DependentUpon>ImageFiltering.xaml</DependentUpon>
@@ -93,6 +108,10 @@
     <Compile Include="Src\ImageFiltering\YCbCrViewerWindow.xaml.cs">
       <DependentUpon>YCbCrViewerWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Src\Graphics3d\Graphics3d.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Src\ImageFiltering\ImageFiltering.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -138,6 +157,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Src\packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
