@@ -79,34 +79,34 @@ namespace cgshop
             drawer.AddShape(cuboid1);
 
             Matrix4x4 M_Model_Sphere1 = new Matrix4x4(
-               1, 0, 0, 0, // X
-               0, 1, 0, 0, // Y
-               0, 0, 1, 0, // Z
+               1, 0, 0, 0, 
+               0, 1, 0, 0, 
+               0, 0, 1, 0, 
                0, 0, 0, 1
             );
             Sphere sphere1 = new Sphere("Sphere1", new Point3d(-200, 0, -350), 50, 10, 6, M_Model_Sphere1);
             drawer.AddShape(sphere1);
 
             Matrix4x4 M_Model_Cone1 = new Matrix4x4(
-               1, 0, 0, 0, // X
-               0, 1, 0, 0, // Y
-               0, 0, 1, 0, // Z
+               1, 0, 0, 0, 
+               0, 1, 0, 0, 
+               0, 0, 1, 0, 
                0, 0, 0, 1
             );
             Cone cone1 = new Cone("Cone1", new Point3d(100, 0, -400), 40, -80, 10, M_Model_Cone1);
             drawer.AddShape(cone1);
 
             Matrix4x4 M_Model_Cylinder1 = new Matrix4x4(
-              1, 0, 0, 0, // X
-              0, 1, 0, 0, // Y
-              0, 0, 1, 0, // Z
+              1, 0, 0, 0,
+              0, 1, 0, 0,
+              0, 0, 1, 0,
               0, 0, 0, 1
             );
             Cylinder cylinder1 = new Cylinder("Cylinder1", new Point3d(0, 0, -150), 50, 70, 9, M_Model_Cylinder1);
             drawer.AddShape(cylinder1);
         }
 
-        private void Refresh()
+        private void Redraw()
         {
             if (stereoscopy)
             {
@@ -150,7 +150,7 @@ namespace cgshop
 
         private void Button_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            Refresh();
+            Redraw();
         }
 
         private void MoveCamera(object sender, System.Windows.RoutedEventArgs e)
@@ -165,17 +165,17 @@ namespace cgshop
                     camera.position.Y -= 1;
                     break;
                 case ("Right"):
-                    camera.position.X += 1;
+                    camera.position.X -= 1;
                     break;
                 case ("Left"):
-                    camera.position.X -= 1;
+                    camera.position.X += 1;
                     break;
                 default:
                     break;
             }
 
             Console.WriteLine("Camera position: (x: " + camera.position.X + ", " + camera.position.Y + ", " + camera.position.Z + ")");
-            Refresh();
+            Redraw();
         }
 
         private void MoveObject(object sender, System.Windows.RoutedEventArgs e)
@@ -200,18 +200,18 @@ namespace cgshop
                 default:
                     break;
             }
-            Refresh();
+            Redraw();
         }
 
         private void Page_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
-            Refresh();
+            Redraw();
         }
 
         private void ToggleStereoscopy(object sender, System.Windows.RoutedEventArgs e)
         {
             stereoscopy = !stereoscopy;
-            Refresh();
+            Redraw();
         }
     }
 }
